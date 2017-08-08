@@ -4,8 +4,18 @@ import os
 import time
 import sys
 import copy
-import commands
+#import commands
+import socket
 
+from commonfunc import CommonGetHost
+def testhost():
+    host, ip = CommonGetHost()
+    print(host)
+    print(ip)
+    #真机返回的内容如下：
+    #DESKTOP-K8TCUQL
+    #192.168.9.122    
+    
 cmd = "getconf LONG_BIT"
 
 def testSpeed1():
@@ -51,4 +61,25 @@ def GetCurrentPath():
     #os.path.split(os.path.realpath(__file__))[0]
     return os.path.split(os.path.realpath(__file__))[0]
 
-print(GetCurrentPath())
+#ipList = socket.gethostbyname_ex(socket.gethostname())
+#print(ipList)
+#testhost()
+
+
+
+def CommonCreateResultFilePath():
+    curpath = os.path.split(os.path.realpath(__file__))[0] + '/'
+    logtime = str(time.time()).replace('.', '')
+    hostname = socket.gethostname()
+    ip = socket.gethostbyname(hostname)
+    
+    logpath = curpath + "log_" + logtime + ".txt"
+    respath = curpath + str(hostname) + str(ip) + ".txt"
+    xlpath = curpath + str(hostname) + str(ip) + ".xlsx"
+    
+    return logpath, respath, xlpath
+
+
+print(CommonCreateResultFilePath()[0])
+print(CommonCreateResultFilePath()[1])
+print(CommonCreateResultFilePath()[2])
