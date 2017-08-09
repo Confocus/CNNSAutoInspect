@@ -114,7 +114,7 @@ class CheckCentOSApache():
         self.serverlimit = ""
         self.maxclient = ""
         self.limitexcept = ""
-        self.errordoc = ""
+        self.errordoc = []
         self.cigbin = ""
         self.accessdir = []
         
@@ -150,7 +150,7 @@ class CheckCentOSApache():
                     print(self.limitexcept)
                     continue
                 if "ErrorDocument" in line:
-                    self.errordoc = line.rstrip()
+                    self.errordoc.append(line.rstrip())
                     continue
                 if "/usr/local/apache2/cgi-bin" in line:
                     self.cigbin = line.rstrip()
@@ -275,16 +275,11 @@ class CheckCentOSApache():
         self.LogList.append(logcontent)
         retlist = ConstructPCTuple(self, self.__xlpos[6], xlcontent, self.__fgpos[6], bfragile)
         self.PCList.append(retlist[0])
-        self.PCList.append(retlist[1])
-        
-        print(logcontent)
-        print(retlist[0][2])
-        print(retlist[1][2])
-           
+ 
     
     def CA_HTTP_Method(self):#8 http://www.iteye.com/problems/15603
         '''
-        This function is used to check the if dangerous methods were forbidden.
+        This function is used to check if dangerous methods were forbidden.
         Formate as follow:
         <LimitExcept GET HEAD POST PUT DELETE TRACE OPTIONS>
         Order Allow,Deny
@@ -351,46 +346,35 @@ class CheckCentOSApache():
         self.PCList.append(pct2) 
         
     
-    def CheckErrorDoc(self):#10
-        rescontent = ""
-        bres = False
-        flag = False
-        f = open(self.mwpath, "a+")
-        f.write("*************************Cocurrent Number*************************\n")                
-        cf = open(self.conffile)
+    def CA_ErrorDoc(self):#10
+        '''
+        This function is used to check if error webpages were customize.
+        Formate as follow:
+        ErrorDocument 500 http://foo.example.com/cgi-bin/tester 
+        '''         
         
-        while 1:
-            line = cf.readline()
+        logcontent = "\nError document:\n"
+        xlcontent = ""
+        bfragile = False
+        
+        for error in self.errordoc:
+            logcontent += error + '\n'
+        for error in self.errordoc:
+            if "403" in error or "404" in error or "500" in error:
+                xlcontent += error + '\n'
+                bfragile = True
+        
+        if len(xlcontent.rstrip()) == 0:
+            xlcontent = "unset"   
             
-            if not line:
-                break
-            if ("ErrorDocument" in line) and (line.lstrip()[0] != '#'):# 
-                rescontent = line.rstrip() + '\n'
-                lst = line.rstrip().lstrip().split()
-                num = lst.index("ErrorDocument")
-                if lst[num + 1] != "403" or \
-                lst[num + 1] == "404" or \
-                lst[num + 1] == "500":
-                    flag = True
-                    break
-                
-        if flag == True:
-            bres = True
-            f.write("Warn:Error Document.\n")
-        else:
-            f.write("OK!\n")
-            
-        cf.close()
-        f.close()
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self, self.__xlpos[9], xlcontent, self.__fgpos[9], bfragile)
+        self.PCList.append(retlist[0])
+        self.PCList.append(retlist[1]) 
         
-        if rescontent == "":
-            rescontent = "No Setting."        
-        
-        pct1 = PCTuple(self.__respos[9][0], self.__respos[9][1], rescontent)
-        pct2 = PCTuple(self.__expos[9][0], self.__expos[9][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)        
-        
+        print(logcontent)     
+        print(retlist[0][2])
+        print(retlist[1][2])
    
     def CheckErrorLog(self):#11
         pass
@@ -630,5 +614,5 @@ def CheckApacheRun():
 if __name__ == "__main__":
     print("start...")
     c = CheckCentOSApache()
-    c.CA_Concurrent_Num()
+    c.CA_ErrorDoc()
     
