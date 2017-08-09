@@ -60,7 +60,7 @@ import time
 import sys
 
 from GenExcel import PCTuple, ConstructPCTuple
-from commonfunc import ComCreateResultFilePath
+from commonfunc import *
 
 class CheckCentOSApache():
     
@@ -71,8 +71,6 @@ class CheckCentOSApache():
         self.__cmd = [
             "ps -ef|grep httpd",
             "ls -ld \/usr\/local\/apache2",
-            #"ls -l /etc/httpd/conf/httpd.conf",2.2
-            #"ls -l /var/log/httpd",2.2
             "ls -l /usr/local/apache2/conf/httpd.conf",
             "ls -l /usr/local/apache2/logs",
             "cat /usr/local/apache2/logs/error_log",##################5
@@ -190,27 +188,51 @@ class CheckCentOSApache():
                 
                 
         
-    def CheckAccount(self):#1
-        rescontent = ""
-        bres = False
-        content = []
-        f = open(self.mwpath, "a+")
-        f.write("*************************Apache Account*************************\n")
-        p = subprocess.Popen(self.__cmd[0], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p.wait()  
-        content = CheckCommonFunc.CompatibleList(p.stdout.readlines()) 
+    def CA_Account(self):#1
+        
+        logcontent = "\nApache account\n"
+        xlcontent = ""
+        bfragile = False
+        accountset = set()
+        
+        #p = subprocess.Popen(self.__cmd[0], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        #retval = p.wait()  
+        #content = ComCompatibleList(p.stdout.readlines())   
+        result = os.popen(self.__cmd[0])  
+        content = ComCompatibleList(result.readlines()) 
         for line in content:
             if "grep" not in line.split()[-2]:
-                rescontent = rescontent + line.rstrip() + '\n'
-                f.write(line + '\n')
-        f.close()
-        if rescontent == "":
-            rescontent = "No Setting."
+                logcontent += line + '\n'   
+                accountset.add(line.split()[0])
+                
+        for i in accountset:
+            xlcontent += i + '\n'
+            
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self, self.__xlpos[0], xlcontent, self.__fgpos[0], bfragile)
+        self.PCList.append(retlist[0])         
         
-        pct1 = PCTuple(self.__respos[0][0], self.__respos[0][1], rescontent)
-        pct2 = PCTuple(self.__expos[0][0], self.__expos[0][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)        
+        print(logcontent)
+        print(retlist[0][2])
+            
+        #content = []
+        #f = open(self.mwpath, "a+")
+        #f.write("*************************Apache Account*************************\n")
+        #p = subprocess.Popen(self.__cmd[0], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        #retval = p.wait()  
+        #content = CheckCommonFunc.CompatibleList(p.stdout.readlines()) 
+        #for line in content:
+            #if "grep" not in line.split()[-2]:
+                #rescontent = rescontent + line.rstrip() + '\n'
+                #f.write(line + '\n')
+        #f.close()
+        #if rescontent == "":
+            #rescontent = "No Setting."
+        
+        #pct1 = PCTuple(self.__respos[0][0], self.__respos[0][1], rescontent)
+        #pct2 = PCTuple(self.__expos[0][0], self.__expos[0][1], "exist" if bres == True else "unexist")
+        #self.PCList.append(pct1)
+        #self.PCList.append(pct2)        
     
     def CheckRootAuth(self):#2
         rescontent = ""
@@ -288,10 +310,6 @@ class CheckCentOSApache():
         self.LogList.append(logcontent)
         retlist = ConstructPCTuple(self, self.__xlpos[3], xlcontent, self.__fgpos[3], bfragile)
         self.PCList.append(retlist[0])      
-        
-        print(logcontent)
-        print(retlist[0][2])
-        print(retlist[1][2])
         
     
     def Check5(self):
@@ -634,5 +652,5 @@ def CheckApacheRun():
 if __name__ == "__main__":
     print("start...")
     c = CheckCentOSApache()
-    c.CA_Access_Dir()
+    c.CA_Account()
     

@@ -148,7 +148,7 @@ def ComCompatibleList(l):#Sheild the difference of between py2list and py3list
     #这里传递的是引用，p.stdout.readlines()运行到这里时已经消失，所以形参l所指向的内容是空的
     content = []
     #print(l)
-    pyVer = GetPyVersion()
+    pyVer = ComGetPyVersion()
     if pyVer == 2:
         content  = copy.deepcopy(l)
     else:
