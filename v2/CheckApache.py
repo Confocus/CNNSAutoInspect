@@ -66,7 +66,7 @@ class CheckCentOSApache():
     
     def __init__(self):
         
-        #self.httpditem = ["Directory", "ServerLimit", "MaxClient", "<LimitExcept", "ErrorDocument", "/usr/local/apache2/cgi-bin"]
+        #self.httpditem = ["Directory", "/usr/local/apache2/cgi-bin"]
         self.httpdpath = "/usr/local/apache2/conf/httpd.conf"
         self.__cmd = [
             "ps -ef|grep httpd",
@@ -92,7 +92,7 @@ class CheckCentOSApache():
                     (23, 8),
                     (24, 8),#10
                     (25, 8),
-                    (26, 8),
+                    (26, 8),#12
                     (27, 8)]
         self.__fgpos = [(14 ,10), #0
                    (15 ,10),
@@ -115,7 +115,7 @@ class CheckCentOSApache():
         self.maxclient = ""
         self.limitexcept = ""
         self.errordoc = []
-        self.cigbin = ""
+        self.cigbin = []
         self.accessdir = []
         
         self.CA_Parse_HTTPD()
@@ -139,27 +139,38 @@ class CheckCentOSApache():
                     continue
                 if line.lstrip()[0] == '#':
                     continue
+                
                 if "ServerLimit" in line:
                     self.serverlimit = line.rstrip()
                     continue
                 if "MaxClient" in line:
                     self.maxclient = line.rstrip()
                     continue
+                
                 if "LimitExcept " in line:
                     self.limitexcept = line.rstrip()
                     print(self.limitexcept)
                     continue
+                
                 if "ErrorDocument" in line:
                     self.errordoc.append(line.rstrip())
                     continue
-                if "/usr/local/apache2/cgi-bin" in line:
-                    self.cigbin = line.rstrip()
+                
+                if "/usr/local/apache2/cgi-bin" in line: 
+                    if "ScriptAlias" in line:
+                        self.cigbin.append(line.lstrip().rstrip())
+                    elif "Directory" in line:
+                        while len(line.lstrip().rstrip()) != 0 and line.lstrip()[0] != '#' and "</Directory>" not in line:
+                            self.cigbin.append(line.rstrip())
+                            line = hf.next() 
+                        self.cigbin.append("</Directory>")
                     continue
+                
                 if "Directory " in line:
                     while len(line.lstrip().rstrip()) != 0 and line.lstrip()[0] != '#' and "</Directory>" not in line:
                         self.accessdir.append(line.rstrip())
                         line = hf.next()
-                    continue
+                    #self.cigbin.append("</Directory>")
                 
                 
         
@@ -371,10 +382,7 @@ class CheckCentOSApache():
         retlist = ConstructPCTuple(self, self.__xlpos[9], xlcontent, self.__fgpos[9], bfragile)
         self.PCList.append(retlist[0])
         self.PCList.append(retlist[1]) 
-        
-        print(logcontent)     
-        print(retlist[0][2])
-        print(retlist[1][2])
+
    
     def CheckErrorLog(self):#11
         pass
@@ -401,62 +409,40 @@ class CheckCentOSApache():
         self.PCList.append(pct1)
                
     
-    def CheckCGI(self):#13
-        rescontent = ""
-        bres = False        
-        flag = False
-        f = open(self.mwpath, "a+")
-        f.write("*************************CGI*************************\n")                
-        cf = open(self.conffile, "r")
+    def CA_CGI(self):#13
+        '''
+        This function is used to check if cgi was deleted.
+        Formate as follow:
+        #<Directory"/usr/local/apache2/cgi-bin">
+        #AllowOverride None
+        #Options None
+        #Order allow,deny
+        #Allow from all
+        #</Directory> 
+        '''         
+    
+        logcontent = "\nCGI:\n"        
+        xlcontent = ""
+        bfragile = False        
         
-        while 1:
-            line = cf.readline()
-            #print(line)
-            try:
-                if line.lstrip()[0] == '#':
-                    continue                            
-            except IndexError:#读到文件结束才会有这个错误
-                if(len(line) == 0):
-                    break
-                else:
-                    continue
-            
-            #try:
-                #if line.lstrip()[0] == '#':
-                    #continue                
-            #except IndexError:
-                #continue 当读到文件结束时，还没有判断if not line:break，就从被except截获了，跳转到while继续读，由于已经读到结束为值，读完了又是空，出现了死循环。
-                #可以运行Windows下的范例进行参考
-            
-            
-            if not line:
-                break
-            if "ScriptAlias" in line and "/cgi-bin/" in line:#  and (line.lstrip()[0] != '#')
-                rescontent = rescontent + line.rstrip() + '\n'
-                flag = True
-                break
-            if "<Directory" in line and "/usr/local/apache2/cgi-bin" in line:
-                rescontent = rescontent + line.rstrip() + '\n'
-                flag = True
-                break                
-            
-        if flag == True:
-            bres = True
-            f.write("Warn:Error Document.\n")
+        for line in self.cigbin:
+            logcontent += line + '\n'
+        
+        if len(self.cigbin) == 0:
+            pass
         else:
-            f.write("OK!\n")
-            
-        cf.close()
-        f.close()
+            bfragile = True
+            for line in self.cigbin:
+                xlcontent += line + '\n'
         
-        if rescontent == "":
-            rescontent = "No Setting."        
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self, self.__xlpos[12], xlcontent, self.__fgpos[12], bfragile)
+        self.PCList.append(retlist[0])
+        self.PCList.append(retlist[1])        
         
-        pct1 = PCTuple(self.__respos[12][0], self.__respos[12][1], rescontent)
-        pct2 = PCTuple(self.__expos[12][0], self.__expos[12][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)           
-        
+        print(logcontent)  
+        print(retlist[0][2])
+        print(retlist[1][2])
     
     def CheckTrace(self):#14
         rescontent = ""
@@ -614,5 +600,5 @@ def CheckApacheRun():
 if __name__ == "__main__":
     print("start...")
     c = CheckCentOSApache()
-    c.CA_ErrorDoc()
+    c.CA_CGI()
     
