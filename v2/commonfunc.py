@@ -10,7 +10,7 @@ class CommonCentOSException(Exception):
     pass      
     
     
-def CommonCreateResultFilePath():
+def ComCreateResultFilePath():
     curpath = os.path.split(os.path.realpath(__file__))[0] + '/'
     logtime = str(time.time()).replace('.', '')
     hostname = socket.gethostname()
@@ -23,27 +23,25 @@ def CommonCreateResultFilePath():
     return logpath, respath, xlpath
     
     
-
-
-def CommonGetCurrentPath():
+def ComGetCurrentPath():
     #os.path.dirname(os.path.realpath(__file__))　
     #os.path.split(os.path.realpath(__file__))[0]
     return os.path.split(os.path.realpath(__file__))[0]
 
 
-def CommonGetHost():
+def ComGetHost():
     hostname = socket.gethostname()
     ip = socket.gethostbyname(hostname)
     return hostname, ip
 
 ##############################################################      GetPyVersion       ########################################################################################
-def CommonGetPyVersion():
+def ComGetPyVersion():
     #print(sys.version_info)
     return sys.version_info[0]
 
 
 ##############################################################      GetLongBit       ########################################################################################
-def CommonGetLongBit():
+def ComGetLongBit():
     cmd = "getconf LONG_BIT"
     p = subprocess.Popen(cmd, shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     retval = p.wait()              
@@ -61,7 +59,7 @@ def CommonGetLongBit():
         lbinfo = 0
     return lbinfo
     
-def CommonGetReleaseVer():
+def ComGetReleaseVer():
     if os.path.exists("/etc/release"):
         return "Solaris"
     
@@ -79,7 +77,7 @@ def CommonGetReleaseVer():
 
 ##############################################################      GetLinuxVer       ########################################################################################
 #Pass CentOS5_i386、CentOS6、CentOS7
-def CommonGetLinuxVer():#CentOS5:Python2;CentOS6:Python2;CentOS7:Python3
+def ComGetLinuxVer():#CentOS5:Python2;CentOS6:Python2;CentOS7:Python3
     count = 0
     cmd = ""
    
@@ -133,7 +131,7 @@ def CommonGetLinuxVer():#CentOS5:Python2;CentOS6:Python2;CentOS7:Python3
     return ver#CentOS5=RedHat5；#CentOS6 = CentOS7 = RedHat6 #外部只需判断是否等于5
 
 
-def CommonCompatibleStr(s):#Sheild the difference between py2str and py3str
+def ComCompatibleStr(s):#Sheild the difference between py2str and py3str
     pyVer = GetPyVersion()
     if pyVer == 2:
         s = s.rstrip().lstrip()
@@ -141,7 +139,7 @@ def CommonCompatibleStr(s):#Sheild the difference between py2str and py3str
         s = str(s.strip().lstrip(), encoding = "utf-8")
     return s
     
-def CommonCompatibleList(l):#Sheild the difference of between py2list and py3list
+def ComCompatibleList(l):#Sheild the difference of between py2list and py3list
     #这里传递的是引用，p.stdout.readlines()运行到这里时已经消失，所以形参l所指向的内容是空的
     content = []
     #print(l)

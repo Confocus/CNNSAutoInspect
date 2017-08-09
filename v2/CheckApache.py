@@ -1,34 +1,47 @@
 #coding=utf-8
 
 '''
-以下全部是针对Apache2.4的检测方法
+以下全部是针对Apache2.4的检测方法;以CentOS作为运行系统。
+
 1、检查httpd.conf配置文件，检查是否使用独立帐号运行Apache，使用如下命令：
 #ps –ef |grep httpd  //查看是否以独立帐号运行Apache。
+
 2、使用ls命令查看Apache主目录权限，是否设置仅root可读写。
+
 3、#ls -l /usr/local/apache2/conf/httpd.conf  //查看httpd.conf的权限是否设置为600；
   #ls -l /usr/local/apache2/logs/*.log  //查看日志文件的权限是否设置为644。
+  
 4、vi /usr/local/apache2/conf/httpd.conf
 查看是否设置Apache可访问目录。
+
 5、删除无用文件，使用如下命令：
 #ls -l /usr/local/apache2/htdocs/  //查看缺省的HTML文件是否删除；
 #ls -l /usr/local/apache2/cgi-bin/  //查看缺省的 CGI 脚本是否删除；
 #ls -l /usr/local/apache2/manual  //查看Apache 说明文件是否删除；
 #ls -l /path/to/httpd-2.2.4*   //查看源代码文件是否删除。
+
 6、访问http://ip/xxx, xxx为存在的目录，当xxx目录下没有默认首页文件时，浏览器是否显示该目录下的可用文件列表和子目录。
+
 7、 cat /usr/local/apache2/conf/httpd.conf
 查看配置文件是否合理设置。
+
 8、cat /usr/local/apache2/conf/httpd.conf
 检查相关配置项是否包含PUT、DELETE等危险方法：
 <LimitExcept GET POST > 
 Deny from all
 </LimitExcept>
+
 9、cat /usr/local/apache2/conf/httpd.conf
 检查“ServerTokens OS”是否修改为“ServerTokens  Prod”。
+
 10、cat /usr/local/apache2/conf/httpd.conf
 检查是否自定义403、404、500错误页面。
+
 11、 #ls –l /usr/local/apache2/logs  //查看Apache日志文件
   #cat /usr/local/apache2/logs/error_log  //查看错误日志的内容
+  
 12、使用命令“apachectl -v”查看Apache版本号，与http://httpd.apache.org/download.cgi网站上的版本号进行对比，根据实际情况决定是否进行版本更新。
+
 13、使用命令“cat /usr/local/apache2/conf/httpd.conf”查看配置文件，检查相关的配置项是否已按参考配置要求正确注释：
   #ScriptAlias /cgi-bin/ "/usr/local/apache2/cgi-bin/"
   #<Directory"/usr/local/apache2/cgi-bin">
@@ -37,6 +50,7 @@ Deny from all
   #Order allow,deny
   #Allow from all
   #</Directory>
+  
 14、 cat /usr/local/apache2/conf/httpd.conf
 检查是否添加了“TraceEnable off”配置项。
 '''
@@ -45,16 +59,16 @@ import os
 import time
 import sys
 
-from GenExcel import PCTuple, OperExcel
-import CheckCommonFunc
+#from GenExcel import PCTuple, OperExcel
+from commonfunc import ComCreateResultFilePath
 
 #4/5
-class CheckRHELApache():
+class CheckCentOSApache():
     
     def __init__(self):
-        self.respath = "/usr/ProjectTest/res.txt"
+        self.logpath, self.respath, self.xlpath = ComCreateResultFilePath()
+        self.httpditem = ["Directory", "ServerLimit", "MaxClient", "<LimitExcept", "ErrorDocument", "/usr/local/apache2/cgi-bin"]
         self.conffile = "/usr/local/apache2/conf/httpd.conf"
-        self.mwpath = "/usr/ProjectTest/mwres.txt"
         self.__cmd = [
             "ps -ef|grep httpd",
             "ls -ld \/usr\/local\/apache2",
@@ -95,6 +109,63 @@ class CheckRHELApache():
                    (26, 10),
                    (27, 10)]
         
+    def CA_Parse_HTTPD(self, cmdline = "/usr/local/apache2/conf/httpd.conf"):   #httpd.conf exists in this path by default.
+        '''CA means Check apache
+           HTTPD means httpd.conf file
+           long function name can avoid collision with functions in other module
+        '''
+        
+        #result = os.popen(cmdline)  #考虑到文件可能较大，不使用管道
+        #res = result.read() 
+        
+        sl = ""
+        mc = ""
+        le = ""
+        ed = ""
+        cb = ""
+        dt = []
+        
+        with open("/usr/local/apache2/conf/httpd.conf", 'r') as hf:
+            '''key items:
+            "Directory", "ServerLimit", "MaxClient", "<LimitExcept", "ErrorDocument", "/usr/local/apache2/cgi-bin"
+            '''
+    
+            for line in hf:
+                if len(line.lstrip().rstrip()) == 0:
+                    continue
+                if line.lstrip()[0] == '#':
+                    continue
+                if "ServerLimit" in line:
+                    ls = line.rstrip()
+                    continue
+                if "MaxClient" in line:
+                    mc = line.rstrip()
+                    continue
+                if "<LimitExcept" in line:
+                    le = line.rstrip()
+                    continue
+                if "ErrorDocument" in line:
+                    ed = line.rstrip()
+                    continue
+                if "/usr/local/apache2/cgi-bin" in line:
+                    cb = line.rstrip()
+                    continue
+                if "<Directory" in line:
+                    while len(line.lstrip().rstrip()) != 0 and line.lstrip()[0] != '#' and "</Directory>" not in line:
+                        dt.append(line.rstrip())
+                        line = hf.next()
+                    continue
+                
+        print(sl)
+        print(mc)
+        print(le)
+        print(ed)
+        print(cb)
+        for i in dt:
+            print(i)
+                    
+                
+                
         
     def CheckAccount(self):#1
         rescontent = ""
@@ -577,5 +648,6 @@ def CheckApacheRun():
     
 if __name__ == "__main__":
     print("start...")
-    CheckApacheRun()
+    c = CheckCentOSApache()
+    c.CA_Parse_HTTPD()
     
