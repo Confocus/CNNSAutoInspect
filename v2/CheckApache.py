@@ -166,11 +166,27 @@ class CheckCentOSApache():
                         self.cigbin.append("</Directory>")
                     continue
                 
-                if "Directory " in line:
+                if "<Directory " in line:#"Require all granted"
+                    '''http://www.jb51.net/article/64280.htm'''
+                    
+                    count = 0
+                    bflag = False
+                    
                     while len(line.lstrip().rstrip()) != 0 and line.lstrip()[0] != '#' and "</Directory>" not in line:
-                        self.accessdir.append(line.rstrip())
+                        if "Require all granted" in line:
+                            bflag = True
+                        self.accessdir.append(line.rstrip())  
+                        count += 1
                         line = hf.next()
-                    #self.cigbin.append("</Directory>")
+                    self.accessdir.append("</Directory>")
+                    count += 1
+                    if bflag == False: #回退
+                        while(count != 0):
+                            self.accessdir.pop()
+                            count -= 1
+                    else:
+                        count = 0
+                        bflag = False
                 
                 
         
@@ -255,8 +271,29 @@ class CheckCentOSApache():
         self.PCList.append(pct1)
         self.PCList.append(pct2)         
   
-    def Check4(self):
-        pass
+    def CA_Access_Dir(self):
+        
+        logcontent = "\nAccess Directory:\n"
+        xlcontent = ""
+        bfragile = False
+        
+        if len(self.accessdir) == 0:
+            xlcontent = "Default."
+        else:
+            bfragile = True
+            for line in self.accessdir:
+                logcontent += line + '\n'
+                xlcontent += line + '\n'
+                
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self, self.__xlpos[3], xlcontent, self.__fgpos[3], bfragile)
+        self.PCList.append(retlist[0])      
+        
+        print(logcontent)
+        print(retlist[0][2])
+        print(retlist[1][2])
+        
+    
     def Check5(self):
         pass
     def Check6(self):
@@ -440,9 +477,6 @@ class CheckCentOSApache():
         self.PCList.append(retlist[0])
         self.PCList.append(retlist[1])        
         
-        print(logcontent)  
-        print(retlist[0][2])
-        print(retlist[1][2])
     
     def CheckTrace(self):#14
         rescontent = ""
@@ -600,5 +634,5 @@ def CheckApacheRun():
 if __name__ == "__main__":
     print("start...")
     c = CheckCentOSApache()
-    c.CA_CGI()
+    c.CA_Access_Dir()
     
