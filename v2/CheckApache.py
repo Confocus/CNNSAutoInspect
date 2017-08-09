@@ -188,7 +188,7 @@ class CheckCentOSApache():
                 
                 
         
-    def CA_Account(self):#1
+    def CA_Check_Account(self):#1
         
         logcontent = "\nApache account\n"
         xlcontent = ""
@@ -200,6 +200,7 @@ class CheckCentOSApache():
         #content = ComCompatibleList(p.stdout.readlines())   
         result = os.popen(self.__cmd[0])  
         content = ComCompatibleList(result.readlines()) 
+        
         for line in content:
             if "grep" not in line.split()[-2]:
                 logcontent += line + '\n'   
@@ -208,31 +209,13 @@ class CheckCentOSApache():
         for i in accountset:
             xlcontent += i + '\n'
             
+        if len(accountset) == 0:
+            xlcontent = "No account."
+            
         self.LogList.append(logcontent)
         retlist = ConstructPCTuple(self, self.__xlpos[0], xlcontent, self.__fgpos[0], bfragile)
         self.PCList.append(retlist[0])         
-        
-        print(logcontent)
-        print(retlist[0][2])
-            
-        #content = []
-        #f = open(self.mwpath, "a+")
-        #f.write("*************************Apache Account*************************\n")
-        #p = subprocess.Popen(self.__cmd[0], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        #retval = p.wait()  
-        #content = CheckCommonFunc.CompatibleList(p.stdout.readlines()) 
-        #for line in content:
-            #if "grep" not in line.split()[-2]:
-                #rescontent = rescontent + line.rstrip() + '\n'
-                #f.write(line + '\n')
-        #f.close()
-        #if rescontent == "":
-            #rescontent = "No Setting."
-        
-        #pct1 = PCTuple(self.__respos[0][0], self.__respos[0][1], rescontent)
-        #pct2 = PCTuple(self.__expos[0][0], self.__expos[0][1], "exist" if bres == True else "unexist")
-        #self.PCList.append(pct1)
-        #self.PCList.append(pct2)        
+           
     
     def CheckRootAuth(self):#2
         rescontent = ""
