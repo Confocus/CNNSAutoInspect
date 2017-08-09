@@ -10,6 +10,11 @@ class CommonCentOSException(Exception):
     pass      
     
     
+def ComOutputLog():
+    pass
+def ComOutputExcel():
+    pass
+
 def ComCreateResultFilePath():
     curpath = os.path.split(os.path.realpath(__file__))[0] + '/'
     logtime = str(time.time()).replace('.', '')

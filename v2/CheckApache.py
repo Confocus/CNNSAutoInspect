@@ -62,13 +62,12 @@ import sys
 #from GenExcel import PCTuple, OperExcel
 from commonfunc import ComCreateResultFilePath
 
-#4/5
 class CheckCentOSApache():
     
     def __init__(self):
-        self.logpath, self.respath, self.xlpath = ComCreateResultFilePath()
-        self.httpditem = ["Directory", "ServerLimit", "MaxClient", "<LimitExcept", "ErrorDocument", "/usr/local/apache2/cgi-bin"]
-        self.conffile = "/usr/local/apache2/conf/httpd.conf"
+        
+        #self.httpditem = ["Directory", "ServerLimit", "MaxClient", "<LimitExcept", "ErrorDocument", "/usr/local/apache2/cgi-bin"]
+        self.httpdpath = "/usr/local/apache2/conf/httpd.conf"
         self.__cmd = [
             "ps -ef|grep httpd",
             "ls -ld \/usr\/local\/apache2",
@@ -80,6 +79,7 @@ class CheckCentOSApache():
             "apachectl -v"
         ]
         self.PCList = []
+        self.LogList = []
         self.__respos = [(14 ,8), #0
                     (15 ,8),
                     (16, 8),
@@ -109,7 +109,18 @@ class CheckCentOSApache():
                    (26, 10),
                    (27, 10)]
         
-    def CA_Parse_HTTPD(self, cmdline = "/usr/local/apache2/conf/httpd.conf"):   #httpd.conf exists in this path by default.
+        self.logpath, self.respath, self.xlpath = ComCreateResultFilePath()
+        
+        self.serverlimit = ""
+        self.maxclient = ""
+        self.limitexcept = ""
+        self.errordoc = ""
+        self.cigbin = ""
+        self.accessdir = []
+        
+        self.CA_Parse_HTTPD()
+        
+    def CA_Parse_HTTPD(self, httpdpath = "/usr/local/apache2/conf/httpd.conf"):   #httpd.conf exists in this path by default.
         '''CA means Check apache
            HTTPD means httpd.conf file
            long function name can avoid collision with functions in other module
@@ -118,14 +129,7 @@ class CheckCentOSApache():
         #result = os.popen(cmdline)  #考虑到文件可能较大，不使用管道
         #res = result.read() 
         
-        sl = ""
-        mc = ""
-        le = ""
-        ed = ""
-        cb = ""
-        dt = []
-        
-        with open("/usr/local/apache2/conf/httpd.conf", 'r') as hf:
+        with open(httpdpath, 'r') as hf:
             '''key items:
             "Directory", "ServerLimit", "MaxClient", "<LimitExcept", "ErrorDocument", "/usr/local/apache2/cgi-bin"
             '''
@@ -136,34 +140,25 @@ class CheckCentOSApache():
                 if line.lstrip()[0] == '#':
                     continue
                 if "ServerLimit" in line:
-                    ls = line.rstrip()
+                    self.serverlimit = line.rstrip()
                     continue
                 if "MaxClient" in line:
-                    mc = line.rstrip()
+                    self.maxclient = line.rstrip()
                     continue
                 if "<LimitExcept" in line:
-                    le = line.rstrip()
+                    self.limitexcept = line.rstrip()
                     continue
                 if "ErrorDocument" in line:
-                    ed = line.rstrip()
+                    self.errordoc = line.rstrip()
                     continue
                 if "/usr/local/apache2/cgi-bin" in line:
-                    cb = line.rstrip()
+                    self.cigbin = line.rstrip()
                     continue
                 if "<Directory" in line:
                     while len(line.lstrip().rstrip()) != 0 and line.lstrip()[0] != '#' and "</Directory>" not in line:
-                        dt.append(line.rstrip())
+                        self.accessdir.append(line.rstrip())
                         line = hf.next()
                     continue
-                
-        print(sl)
-        print(mc)
-        print(le)
-        print(ed)
-        print(cb)
-        for i in dt:
-            print(i)
-                    
                 
                 
         
@@ -258,40 +253,30 @@ class CheckCentOSApache():
     
       
     def CheckCoCurNum(self):#7
-        rescontent = ""
-        bres = False        
-        count = 0
-        f = open(self.mwpath, "a+")
-        f.write("*************************Cocurrent Number*************************\n")                
-        cf = open(self.conffile)
+        '''
+        This function is used to parse ServerLimit and MaxClient.
+        Format as follow: 
+        ServerLimit 16
+        MaxClient 16
+        '''
         
-        while 1:
-            line = cf.readline()
-            #print(type(line))
-            
-            if not line:
-                break
-            if "ServerLimit" in line and line.lstrip()[0] != '#':# 
-                #print(line.lstrip()[0])
-                rescontent = rescontent + line.rstrip() + '\n'
-                f.write(line.rstrip().lstrip() + '\n')
-                count += 1
-            if "MaxClient" in line and line.lstrip()[0] != '#': #
-                rescontent = rescontent + line.rstrip() + '\n'
-                f.write(line.rstrip().lstrip() + '\n')   
-                count += 1    
-                
-        if rescontent == "":
-            rescontent = "No Setting."
-            bres = True
-            
-        cf.close()
-        f.close()
+        logcontent = "Cocurrent number:\n"
+        xlcontent = "" 
+        bfragile = False
         
-        pct1 = PCTuple(self.__respos[6][0], self.__respos[6][1], rescontent)
-        pct2 = PCTuple(self.__expos[6][0], self.__expos[6][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)          
+        logcontent += self.serverlimit + '\n'
+        logcontent += self.maxclient +'\n'
+        xlcontent += self.serverlimit + '\n'
+        xlcontent += self.maxclient 
+        
+        self.LogList.append(logcontent)
+        for i in self.LogList:
+            print(i)
+    
+        #pct1 = PCTuple(self.__respos[6][0], self.__respos[6][1], rescontent)
+        #pct2 = PCTuple(self.__expos[6][0], self.__expos[6][1], "exist" if bres == True else "unexist")
+        #self.PCList.append(pct1)
+        #self.PCList.append(pct2)          
     
     
     def CheckMethod(self):#8 http://www.iteye.com/problems/15603
@@ -649,5 +634,5 @@ def CheckApacheRun():
 if __name__ == "__main__":
     print("start...")
     c = CheckCentOSApache()
-    c.CA_Parse_HTTPD()
+    c.CheckCoCurNum()
     
