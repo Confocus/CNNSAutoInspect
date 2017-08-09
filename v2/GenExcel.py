@@ -46,7 +46,7 @@ def ConstructPCTuple(self, xlpos, xlcontent, fgpos, bf):
     bf:If there is a fragile point.
     '''
     pct1 = PCTuple(xlpos[0], xlpos[1], xlcontent)
-    pct2 = PCTuple(fgpos[0], fgpos[1], "exist" if bf == True else "unexist")
+    pct2 = PCTuple(fgpos[0], fgpos[1], "Y" if bf == True else "N")
     return pct1, pct2
     
 

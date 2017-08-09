@@ -145,8 +145,9 @@ class CheckCentOSApache():
                 if "MaxClient" in line:
                     self.maxclient = line.rstrip()
                     continue
-                if "<LimitExcept" in line:
+                if "LimitExcept " in line:
                     self.limitexcept = line.rstrip()
+                    print(self.limitexcept)
                     continue
                 if "ErrorDocument" in line:
                     self.errordoc = line.rstrip()
@@ -154,7 +155,7 @@ class CheckCentOSApache():
                 if "/usr/local/apache2/cgi-bin" in line:
                     self.cigbin = line.rstrip()
                     continue
-                if "<Directory" in line:
+                if "Directory " in line:
                     while len(line.lstrip().rstrip()) != 0 and line.lstrip()[0] != '#' and "</Directory>" not in line:
                         self.accessdir.append(line.rstrip())
                         line = hf.next()
@@ -252,7 +253,7 @@ class CheckCentOSApache():
     
     
       
-    def CA_ConcurrentNum(self):#7
+    def CA_Concurrent_Num(self):#7
         '''
         This function is used to parse ServerLimit and MaxClient.
         Format as follow: 
@@ -260,7 +261,7 @@ class CheckCentOSApache():
         MaxClient 16
         '''
         
-        logcontent = "Concurrent number:\n"
+        logcontent = "\nConcurrent number:\n"
         xlcontent = "" 
         bfragile = False
         
@@ -269,51 +270,46 @@ class CheckCentOSApache():
         xlcontent += self.serverlimit + '\n'
         xlcontent += self.maxclient 
         
+        if len(xlcontent.rstrip()) == 0:
+            xlcontent = "unset"
         self.LogList.append(logcontent)
         retlist = ConstructPCTuple(self, self.__xlpos[6], xlcontent, self.__fgpos[6], bfragile)
         self.PCList.append(retlist[0])
         self.PCList.append(retlist[1])
         
-        
+        print(logcontent)
+        print(retlist[0][2])
+        print(retlist[1][2])
+           
     
-                 
-    
-    
-    def CheckMethod(self):#8 http://www.iteye.com/problems/15603
-        rescontent = ""
-        bres = False            
-        method = ""
-        flag = False
-        f = open(self.mwpath, "a+")
-        f.write("*************************HTTP Configuration*************************\n")          
-        cf = open(self.conffile)      
+    def CA_HTTP_Method(self):#8 http://www.iteye.com/problems/15603
+        '''
+        This function is used to check the if dangerous methods were forbidden.
+        Formate as follow:
+        <LimitExcept GET HEAD POST PUT DELETE TRACE OPTIONS>
+        Order Allow,Deny
+        Deny from all
+        </LimitExcept> 
+        '''        
         
-        while 1:
-            line = cf.readline()    
-            if not line:
-                break
-            if "<LimitExcept" in line and line.lstrip()[0] != '#':# 
-                method = line.lstrip().rstrip()
-                rescontent = method + '\n'
-                if "PUT" in method or "DELETE" in method:
-                    flag = True
-                break
-        if flag == True:
-            bres = True
-            f.write("Warn:HTTP Configuration.\n")
-        else:
-            f.write("OK.\n")    
-            
-        cf.close()    
-        f.close()
+        logcontent = "\nHTTP method:\n"
+        xlcontent = ""
+        bfragile = False
         
-        if rescontent == "":
-            rescontent = "No Setting."        
+        logcontent += self.limitexcept + '\n'
+        for method in self.limitexcept.lstrip('<').rstrip('>').split():
+            if method == "LimitExcept":
+                continue
+            xlcontent += method + ' '
+            if "PUT" == method or "DELETE" == method:
+                bfragile = True
         
-        pct1 = PCTuple(self.__respos[7][0], self.__respos[7][1], rescontent)
-        pct2 = PCTuple(self.__expos[7][0], self.__expos[7][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)         
+        if len(xlcontent.rstrip()) == 0:
+            xlcontent = "unset"
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self, self.__xlpos[7], xlcontent, self.__fgpos[7], bfragile)
+        self.PCList.append(retlist[0])
+        self.PCList.append(retlist[1])        
         
         
     def CheckToken(self):#9
@@ -634,5 +630,5 @@ def CheckApacheRun():
 if __name__ == "__main__":
     print("start...")
     c = CheckCentOSApache()
-    c.CA_ConcurrentNum()
+    c.CA_Concurrent_Num()
     
