@@ -59,7 +59,7 @@ import os
 import time
 import sys
 
-#from GenExcel import PCTuple, OperExcel
+from GenExcel import PCTuple, ConstructPCTuple
 from commonfunc import ComCreateResultFilePath
 
 class CheckCentOSApache():
@@ -80,7 +80,7 @@ class CheckCentOSApache():
         ]
         self.PCList = []
         self.LogList = []
-        self.__respos = [(14 ,8), #0
+        self.__xlpos = [(14 ,8), #0
                     (15 ,8),
                     (16, 8),
                     (17, 8),
@@ -94,7 +94,7 @@ class CheckCentOSApache():
                     (25, 8),
                     (26, 8),
                     (27, 8)]
-        self.__expos = [(14 ,10), #0
+        self.__fgpos = [(14 ,10), #0
                    (15 ,10),
                    (16, 10),
                    (17, 10),
@@ -252,7 +252,7 @@ class CheckCentOSApache():
     
     
       
-    def CheckCoCurNum(self):#7
+    def CA_ConcurrentNum(self):#7
         '''
         This function is used to parse ServerLimit and MaxClient.
         Format as follow: 
@@ -260,7 +260,7 @@ class CheckCentOSApache():
         MaxClient 16
         '''
         
-        logcontent = "Cocurrent number:\n"
+        logcontent = "Concurrent number:\n"
         xlcontent = "" 
         bfragile = False
         
@@ -270,13 +270,13 @@ class CheckCentOSApache():
         xlcontent += self.maxclient 
         
         self.LogList.append(logcontent)
-        for i in self.LogList:
-            print(i)
+        retlist = ConstructPCTuple(self, self.__xlpos[6], xlcontent, self.__fgpos[6], bfragile)
+        self.PCList.append(retlist[0])
+        self.PCList.append(retlist[1])
+        
+        
     
-        #pct1 = PCTuple(self.__respos[6][0], self.__respos[6][1], rescontent)
-        #pct2 = PCTuple(self.__expos[6][0], self.__expos[6][1], "exist" if bres == True else "unexist")
-        #self.PCList.append(pct1)
-        #self.PCList.append(pct2)          
+                 
     
     
     def CheckMethod(self):#8 http://www.iteye.com/problems/15603
@@ -574,7 +574,7 @@ def CheckApacheRun():
     try:    
         c.CheckMethod()
     except:
-        flog.write("CheckMethod exception.\n")
+        flog.write("CheckMethod exception.\n")  
     else:
         flog.write("CheckMethod finished.\n")  
         
@@ -634,5 +634,5 @@ def CheckApacheRun():
 if __name__ == "__main__":
     print("start...")
     c = CheckCentOSApache()
-    c.CheckCoCurNum()
+    c.CA_ConcurrentNum()
     
