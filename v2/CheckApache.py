@@ -119,7 +119,8 @@ class CheckCentOSApache():
         self.CA_Parse_HTTPD()
         
     def CA_Parse_HTTPD(self, httpdpath = "/usr/local/apache2/conf/httpd.conf"):   #httpd.conf exists in this path by default.
-        '''CA means Check apache
+        '''
+           CA means Check apache
            HTTPD means httpd.conf file
            long function name can avoid collision with functions in other module
         '''
@@ -198,7 +199,7 @@ class CheckCentOSApache():
         #p = subprocess.Popen(self.__cmd[0], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         #retval = p.wait()  
         #content = ComCompatibleList(p.stdout.readlines())   
-        result = os.popen(self.__cmd[0])  
+        result = os.popen(self.__cmd[1])  
         content = ComCompatibleList(result.readlines()) 
         
         for line in content:
@@ -217,29 +218,34 @@ class CheckCentOSApache():
         self.PCList.append(retlist[0])         
            
     
-    def CheckRootAuth(self):#2
-        rescontent = ""
-        bres = False        
-        f = open(self.mwpath, "a+")
-        f.write("*************************RootDir Authority*************************\n")
-        p = subprocess.Popen(self.__cmd[1], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p.wait()  
-        auth = CheckCommonFunc.CompatibleStr(p.stdout.read())
-        rescontent = auth.rstrip() + '\n'
-        if auth.split()[0] == "drw-------." or auth.split()[0] == "drw-------":
+    def CA_RootDir_Auth(self):#2
+        logcontent = "\nRootDir authority\n"
+        xlcontent = ""
+        bfragile = False        
+        
+        #p = subprocess.Popen(self.__cmd[1], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        #retval = p.wait()  
+        #auth = CheckCommonFunc.CompatibleStr(p.stdout.read())
+        result = os.popen(self.__cmd[1])  
+        rootdirauth = ComCompatibleList(result.readline())         
+        
+        logcontent += rootdirauth + '\n'
+        if rootdirauth.split()[0] == "drw-------." or rootdirauth.split()[0] == "drw-------":
             pass
         else:
-            bres = True
-        f.write(auth + '\n')
-        f.close()
+            bfragile = True
         
-        if rescontent == "":
-            rescontent = "No Setting."
-            
-        pct1 = PCTuple(self.__respos[1][0], self.__respos[1][1], rescontent)
-        pct2 = PCTuple(self.__expos[1][0], self.__expos[1][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)         
+        xlcontent = rootdirauth.split()[0]
+        
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self, self.__xlpos[1], xlcontent, self.__fgpos[1], bfragile)
+        self.PCList.append(retlist[0])     
+        self.PCList.append(retlist[1])
+        
+        print(logcontent)
+        print(xlcontent)
+        print(retlist[0][2])
+        print(retlist[1][2])
         
     
     def CheckConfAuth(self):#3
@@ -635,5 +641,5 @@ def CheckApacheRun():
 if __name__ == "__main__":
     print("start...")
     c = CheckCentOSApache()
-    c.CA_Account()
+    c.CA_RootDir_Auth()
     
