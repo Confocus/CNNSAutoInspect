@@ -74,7 +74,7 @@ class CheckCentOSApache():
             "ls -l /usr/local/apache2/conf/httpd.conf",
             "ls -l /usr/local/apache2/logs",
             "cat /usr/local/apache2/logs/error_log",##################5
-            "apachectl -v"
+            "./apachectl -v"
         ]
         self.PCList = []
         self.LogList = []
@@ -116,6 +116,7 @@ class CheckCentOSApache():
         self.errordoc = []
         self.cigbin = []
         self.accessdir = []
+        self.traceenable = ""
         
         self.CA_Parse_HTTPD()
         
@@ -153,11 +154,15 @@ class CheckCentOSApache():
                 
                 if "LimitExcept " in line:
                     self.limitexcept = line.rstrip()
-                    print(self.limitexcept)
+                    #print(self.limitexcept)
                     continue
                 
                 if "ErrorDocument" in line:
                     self.errordoc.append(line.rstrip())
+                    continue
+                
+                if "TraceEnable" in line:
+                    self.traceenable = line.rstrip()
                     continue
                 
                 if "/usr/local/apache2/cgi-bin" in line: 
@@ -474,6 +479,7 @@ class CheckCentOSApache():
         
         retlist = ConstructPCTuple(self, self.__xlpos[10], xlcontent, self.__fgpos[10], bfragile)
         self.PCList.append(retlist[0])
+        #print(xlcontent)
         
     
     def CA_Logs_Content(self, cmdline = "ls -l /usr/local/apache2/logs"):
@@ -481,6 +487,7 @@ class CheckCentOSApache():
         logcontent = "\nLogs content:\n"
         xlcontent = ""
         bfragile = False        
+        content = []
         
         result = os.popen(cmdline)     
         content = ComCompatibleList(result.readlines())  
@@ -488,7 +495,7 @@ class CheckCentOSApache():
         for line in content:
             logcontent += line + '\n'
         
-        xlcontent = logcontent
+        xlcontent = logcontent[len("\nLogs content:\n") - 1 : ]
         
         self.LogList.append(logcontent)
         return xlcontent
@@ -497,7 +504,8 @@ class CheckCentOSApache():
         
         logcontent = "\nErrorlogs content:\n"
         xlcontent = ""
-        bfragile = False     
+        bfragile = False  
+        content = []
         
         result = os.popen(cmdline)     
         content = ComCompatibleList(result.readlines())  
@@ -505,31 +513,32 @@ class CheckCentOSApache():
         for line in content:
             logcontent += line + '\n'
             
-        xlcontent = logcontent
+        xlcontent = logcontent[len("\nErrorlogs content:\n") - 1 : ]
+        self.LogList.append(logcontent)
         
         return xlcontent
         
     
-    def CheckApacheVer(self):#12
-        rescontent = ""
-        bres = False
-        content = []
-        f = open(self.mwpath, "a+")
-        f.write("*************************Apache Version*************************\n")
+    def CA_Version(self, cmdline = "/usr/local/apache2/bin/apachectl -v"):#12
         
-        p = subprocess.Popen(self.__cmd[5], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p.wait()  
+        logcontent = "\nApache Version:\n"
+        xlcontent = ""
+        bfragile = False   
+    
+        result = os.popen(cmdline)     
+        content = ComCompatibleList(result.readlines())
         
-        content = CheckCommonFunc.CompatibleList(p.stdout.readlines()) 
+        for line in content:
+            logcontent += line + '\n'
+            if "Server version" in line:
+                xlcontent = line
         
-        for i in content:
-            rescontent = rescontent + i.rstrip() + '\n'
-            f.write(i.rstrip().lstrip() + '\n')
-            
-        f.close()
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self, self.__xlpos[11], xlcontent, self.__fgpos[11], bfragile)
+        self.PCList.append(retlist[0])  
         
-        pct1 = PCTuple(self.__respos[11][0], self.__respos[11][1], rescontent)
-        self.PCList.append(pct1)
+        print(logcontent)
+        print(retlist[0][2])
                
     
     def CA_CGI(self):#13
@@ -564,50 +573,28 @@ class CheckCentOSApache():
         self.PCList.append(retlist[1])        
         
     
-    def CheckTrace(self):#14
-        rescontent = ""
-        bres = False             
-        flag = False
-        f = open(self.mwpath, "a+")
-        f.write("*************************Trace*************************\n")                
-        cf = open(self.conffile, "r")
+    def CA_Trace_Enable(self):#14
         
-        while 1:
-            line = cf.readline()
-            #print(line)
-            try:
-                if line.lstrip()[0] == '#':
-                    continue                            
-            except IndexError:#读到文件结束才会有这个错误
-                if(len(line) == 0):
-                    break
-                else:
-                    continue
-            if not line:
-                break
-            if "TraceEnable" in line:
-                rescontent = line.rstrip() + '\n'
-                if "off" in line:
-                    flag = True
-                break
-            
-        if flag == True:
-            bres = True
-            f.write("Warn:Trace.\n")
+        logcontent = "\nTrace Enable:\n"        
+        xlcontent = ""
+        bfragile = False       
+        
+        if len(self.traceenable) == 0:
+            xlcontent = "Default setting."
         else:
-            f.write("OK!\n")
-            
-        cf.close()
-        f.close()
+            logcontent += self.traceenable
+            xlcontent = self.traceenable
+            if "off" not in self.traceenable:
+                bfragile = True
         
-        if rescontent == "":
-            rescontent = "No Setting."        
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self, self.__xlpos[12], xlcontent, self.__fgpos[12], bfragile)
+        self.PCList.append(retlist[0])
+        self.PCList.append(retlist[1])
         
-        pct1 = PCTuple(self.__respos[13][0], self.__respos[13][1], rescontent)
-        pct2 = PCTuple(self.__expos[13][0], self.__expos[13][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)      
-        
+        print(logcontent)
+        print(retlist[0][2])
+        print(retlist[1][2])
         
 def CheckApacheRun():
     c = CheckRHELApache()
@@ -720,5 +707,5 @@ def CheckApacheRun():
 if __name__ == "__main__":
     print("start...")
     c = CheckCentOSApache()
-    c.CA_Logs_ErrorLogs_Content()
+    c.CA_Trace_Enable()
     
