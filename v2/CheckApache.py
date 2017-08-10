@@ -665,59 +665,40 @@ def CheckApacheRun():
         else:
             flog.write("CheckApacheVersion finished.\n")            
             
+        try:    
+            c.CA_ErrorDoc()
+        except:
+            flog.write("CheckErrorDoc exception.\n")
+        else:
+            flog.write("CheckErrorDoc finished.\n")  
+            
+        try:    
+            c.CA_Logs_ErrorLogs_Content()
+        except:
+            flog.write("CheckErrorLogsContent exception.\n")
+        else:
+            flog.write("CheckErrorLogsContent finished.\n")          
         
-    #try:    
-        #c.CheckConfAuth()
-    #except:
-        #flog.write("CheckConfAuth exception.\n")
-    #else:
-        #flog.write("CheckConfAuth finished.\n")     
-    
-   
-        
-    #try:    
-        #c.CheckMethod()
-    #except:
-        #flog.write("CheckMethod exception.\n")  
-    #else:
-        #flog.write("CheckMethod finished.\n")  
-        
-    #try:    
-        #c.CheckToken()
-    #except:
-        #flog.write("CheckToken exception.\n")
-    #else:
-        #flog.write("CheckToken finished.\n")  
-        
-    #try:    
-        #c.CheckErrorDoc()
-    #except:
-        #flog.write("CheckErrorDoc exception.\n")
-    #else:
-        #flog.write("CheckErrorDoc finished.\n")
-    
-    #try:    
-        #c.CheckErrorLog()
-    #except:
-        #flog.write("CheckErrorLog exception.\n")
-    #else:
-        #flog.write("CheckErrorLog finished.\n")
-        
-    
-        
-    #try:    
-        #c.CheckCGI()
-    #except:
-        #flog.write("CheckCGI exception.\n")
-    #else:
-        #flog.write("CheckCGI finished.\n")
-        
-    #try:    
-        #c.CheckTrace()
-    #except:
-        #flog.write("CheckTrace exception.\n")
-    #else:
-        #flog.write("CheckTrace finished.\n")
+        try:    
+            c.CA_CGI()
+        except:
+            flog.write("CheckCGI exception.\n")
+        else:
+            flog.write("CheckCGI finished.\n")  
+            
+        try:    
+            c.CA_Trace_Enable()
+        except:
+            flog.write("CheckTraceEnable exception.\n")
+        else:
+            flog.write("CheckTraceEnable finished.\n")        
+            
+        try:    
+            c.CA_Server_Token()
+        except:
+            flog.write("CheckServerToken exception.\n")
+        else:
+            flog.write("CheckServerToken finished.\n")  
     
     #try:
         #oe = OperExcel()
