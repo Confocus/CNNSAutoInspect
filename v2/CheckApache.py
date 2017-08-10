@@ -226,7 +226,7 @@ class CheckCentOSApache():
         self.LogList.append(logcontent)
         retlist = ConstructPCTuple(self.__xlpos[0], xlcontent, self.__fgpos[0], bfragile)
         self.PCList.append(retlist[0])         
-        print(len(self.PCList))
+        #print(len(self.PCList))
     
     def CA_RootDir_Auth(self):#2
         logcontent = "\nRootDir authority:\n"
@@ -251,7 +251,7 @@ class CheckCentOSApache():
         retlist = ConstructPCTuple(self.__xlpos[1], xlcontent, self.__fgpos[1], bfragile)
         self.PCList.append(retlist[0])     
         self.PCList.append(retlist[1])
-        print(len(self.PCList))
+        #print(len(self.PCList))
     
     def CA_HTTPD_Logs_Auth(self):
         '''
@@ -266,7 +266,7 @@ class CheckCentOSApache():
         retlist = ConstructPCTuple(self.__xlpos[2], xlcontent, self.__fgpos[2], bfragile)
         self.PCList.append(retlist[0])     
         self.PCList.append(retlist[1])   
-        print(len(self.PCList))
+        #print(len(self.PCList))
     
     def CA_HTTPD_Auth(self, cmdline = "ls -l /usr/local/apache2/conf/httpd.conf"):#3
         
@@ -336,7 +336,7 @@ class CheckCentOSApache():
         self.LogList.append(logcontent)
         retlist = ConstructPCTuple(self.__xlpos[3], xlcontent, self.__fgpos[3], bfragile)
         self.PCList.append(retlist[0])   
-        print(len(self.PCList))
+        #print(len(self.PCList))
         
     
     def Check5(self):
@@ -368,7 +368,7 @@ class CheckCentOSApache():
         self.LogList.append(logcontent)
         retlist = ConstructPCTuple(self.__xlpos[6], xlcontent, self.__fgpos[6], bfragile)
         self.PCList.append(retlist[0])
-        print(len(self.PCList))
+        #print(len(self.PCList))
     
     def CA_HTTP_Method(self):#8 http://www.iteye.com/problems/15603
         '''
@@ -398,7 +398,7 @@ class CheckCentOSApache():
         retlist = ConstructPCTuple(self.__xlpos[7], xlcontent, self.__fgpos[7], bfragile)
         self.PCList.append(retlist[0])
         self.PCList.append(retlist[1])        
-        print(len(self.PCList))
+        #print(len(self.PCList))
         
     def CA_Server_Token(self):#9
         
@@ -419,7 +419,7 @@ class CheckCentOSApache():
         retlist = ConstructPCTuple(self.__xlpos[8], xlcontent, self.__fgpos[8], bfragile)
         self.PCList.append(retlist[0])
         self.PCList.append(retlist[1])          
-        print(len(self.PCList))
+        #print(len(self.PCList))
     
     def CA_ErrorDoc(self):#10
         '''
@@ -446,7 +446,7 @@ class CheckCentOSApache():
         retlist = ConstructPCTuple(self.__xlpos[9], xlcontent, self.__fgpos[9], bfragile)
         self.PCList.append(retlist[0])
         self.PCList.append(retlist[1]) 
-        print(len(self.PCList))
+        #print(len(self.PCList))
         
         
     def CA_Logs_ErrorLogs_Content(self):
@@ -458,7 +458,7 @@ class CheckCentOSApache():
         retlist = ConstructPCTuple(self.__xlpos[10], xlcontent, self.__fgpos[10], bfragile)
         self.PCList.append(retlist[0])
         #print(xlcontent)
-        print(len(self.PCList))
+        #print(len(self.PCList))
         
     
     def CA_Logs_Content(self, cmdline = "ls -l /usr/local/apache2/logs"):
@@ -515,7 +515,7 @@ class CheckCentOSApache():
         self.LogList.append(logcontent)
         retlist = ConstructPCTuple(self.__xlpos[11], xlcontent, self.__fgpos[11], bfragile)
         self.PCList.append(retlist[0])  
-        print(len(self.PCList))
+        #print(len(self.PCList))
                
     
     def CA_CGI(self):#13
@@ -548,7 +548,7 @@ class CheckCentOSApache():
         retlist = ConstructPCTuple(self.__xlpos[12], xlcontent, self.__fgpos[12], bfragile)
         self.PCList.append(retlist[0])
         self.PCList.append(retlist[1])      
-        print(len(self.PCList))
+        #print(len(self.PCList))
         
     
     def CA_Trace_Enable(self):#14
@@ -566,10 +566,10 @@ class CheckCentOSApache():
                 bfragile = True
         
         self.LogList.append(logcontent)
-        retlist = ConstructPCTuple(self.__xlpos[12], xlcontent, self.__fgpos[12], bfragile)
+        retlist = ConstructPCTuple(self.__xlpos[13], xlcontent, self.__fgpos[13], bfragile)
         self.PCList.append(retlist[0])
         self.PCList.append(retlist[1])
-        print(len(self.PCList))
+        #print(len(self.PCList))
     
     def GenTxtLog(self):
         with open(self.respath, 'w') as ftxt:
@@ -681,11 +681,9 @@ def CheckApacheRun():
         else:
             flog.write("CheckServerToken finished.\n")  
             
-        print(len(c.PCList))
-        #oe = OperExcel()
-        #FillContent("/home/wang/Desktop/apache.xlsx", c.PCList)         
+                 
         #try:
-               
+            #FillContent("/home/wang/Desktop/apache.xlsx", c.PCList)
         #except:
             #flog.write("Operate Excel exception.\n")
         #else:
