@@ -112,6 +112,7 @@ class CheckCentOSApache():
         self.serverlimit = ""
         self.maxclient = ""
         self.limitexcept = ""
+        self.servertokens = ""
         self.errordoc = []
         self.cigbin = []
         self.accessdir = []
@@ -129,7 +130,8 @@ class CheckCentOSApache():
         #res = result.read() 
         
         with open(httpdpath, 'r') as hf:
-            '''key items:
+            '''
+            key items:
             "Directory", "ServerLimit", "MaxClient", "<LimitExcept", "ErrorDocument", "/usr/local/apache2/cgi-bin"
             '''
     
@@ -144,6 +146,9 @@ class CheckCentOSApache():
                     continue
                 if "MaxClient" in line:
                     self.maxclient = line.rstrip()
+                    continue
+                if "ServerTokens" in line:
+                    self.servertokens = line.rstrip()
                     continue
                 
                 if "LimitExcept " in line:
@@ -312,10 +317,6 @@ class CheckCentOSApache():
        
         return  xlcontent
          
-        
-    
-    
-    
     
     def CA_LOG_Auth(self):
         p = subprocess.Popen(self.__cmd[3], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -416,43 +417,31 @@ class CheckCentOSApache():
         self.PCList.append(retlist[1])        
         
         
-    def CheckToken(self):#9
-        rescontent = ""
-        bres = False
-        flag = False
-        f = open(self.mwpath, "a+")
-        f.write("*************************Cocurrent Number*************************\n")                
-        cf = open(self.conffile)
+    def CA_Server_Token(self):#9
         
-        while 1:
-            line = cf.readline()
-            
-            if not line:
-                break
-            if ("ServerTokens" in line) and (line.lstrip()[0] != '#'):# 
-                rescontent = line.rstrip() + '\n'
-                lst = line.rstrip().lstrip().split()
-                num = lst.index("ServerTokens")
-                if(lst[num + 1] != "Prod"):
-                    flag = True
-                break
-            
-        if flag == True:
-            bres = True
-            f.write("Warn:Apache Version.\n")
+        logcontent = "\nServer Tokens:\n"
+        xlcontent = ""
+        bfragile = False
+        
+        if len(self.servertokens) == 0:
+            xlcontent = "unset"
         else:
-            f.write("OK!\n")
-            
-        cf.close()
-        f.close()
+            logcontent += self.servertokens
+            xlcontent = self.servertokens
+            num = self.servertokens.split().index("ServerTokens") 
+            if self.servertokens.split()[num + 1] != "Prod":
+                bfragile = True
         
-        if rescontent == "":
-            rescontent = "No Setting."        
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self, self.__xlpos[8], xlcontent, self.__fgpos[8], bfragile)
+        self.PCList.append(retlist[0])
+        self.PCList.append(retlist[1])          
         
-        pct1 = PCTuple(self.__respos[8][0], self.__respos[8][1], rescontent)
-        pct2 = PCTuple(self.__expos[8][0], self.__expos[8][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2) 
+        print(logcontent)
+        print(xlcontent)
+        print(retlist[0][2])
+        print(retlist[1][2])
+       
         
     
     def CA_ErrorDoc(self):#10
@@ -695,5 +684,5 @@ def CheckApacheRun():
 if __name__ == "__main__":
     print("start...")
     c = CheckCentOSApache()
-    c.CA_HTTPD_Logs_Auth()
+    c.CA_Server_Token()
     
