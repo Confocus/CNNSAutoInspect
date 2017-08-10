@@ -519,7 +519,7 @@ class CheckCentOSApache():
         return xlcontent
         
     
-    def CA_Version(self, cmdline = "/usr/local/apache2/bin/apachectl -v"):#12
+    def CA_Apache_Version(self, cmdline = "/usr/local/apache2/bin/apachectl -v"):#12
         
         logcontent = "\nApache Version:\n"
         xlcontent = ""
@@ -597,115 +597,140 @@ class CheckCentOSApache():
         print(retlist[1][2])
         
 def CheckApacheRun():
-    c = CheckRHELApache()
-    assert CheckCommonFunc.GetLinuxVer() != 0
+    c = CheckCentOSApache()
+    assert ComGetLinuxVer() != 0
     
-    #if os.path.exists(CheckCentOS.respath) == True:
-        #os.remove(CheckCentOS.respath)
     if os.path.exists(c.respath) == True:
         os.remove(c.respath)    
-    logtime = str(time.time()).replace('.', '')
-    logpath = "/usr/ProjectTest/log_" + logtime + ".txt"
+    if os.path.exists(c.xlpath)  == True:
+        os.remove(c.xlpath)
+        
+    #logtime = str(time.time()).replace('.', '')
+    #logpath = "/usr/ProjectTest/log_" + logtime + ".txt"
     
-    if os.path.exists("/usr/ProjectTest") == False:
-        os.mkdir("/usr/ProjectTest")    
-    if os.path.exists(logpath) == True:
-        os.remove(logpath)
-        
-    flog = open(logpath, "w")
-
-    print("CentOS version:" + str(CheckCommonFunc.GetLinuxVer()))
+    #if os.path.exists("/usr/ProjectTest") == False:
+        #os.mkdir("/usr/ProjectTest")    
+    #if os.path.exists(logpath) == True:
+        #os.remove(logpath)
     
-    try:    
-        c.CheckAccount()
-    except:
-        flog.write("CheckAccount exception.\n")
-    else:
-        flog.write("CheckAccount finished.\n")    
+    with open(c.logpath, 'w') as lp:
         
-    try:    
-        c.CheckRootAuth()
-    except:
-        flog.write("CheckRootAuth exception.\n")
-    else:
-        flog.write("CheckRootAuth finished.\n")    
+        try:    
+            c.CA_Check_Account()
+        except:
+            flog.write("CheckAccount exception.\n")
+        else:
+            flog.write("CheckAccount finished.\n")    
+            
+        try:    
+            c.CA_RootDir_Auth()
+        except:
+            flog.write("CheckRootAuth exception.\n")
+        else:
+            flog.write("CheckRootAuth finished.\n")            
         
-    try:    
-        c.CheckConfAuth()
-    except:
-        flog.write("CheckConfAuth exception.\n")
-    else:
-        flog.write("CheckConfAuth finished.\n")     
+        try:    
+            c.CA_HTTPD_Logs_Auth()
+        except:
+            flog.write("CheckHTTPDLogs exception.\n")
+        else:
+            flog.write("CheckHTTPDLogs finished.\n")  
+            
+        try:    
+            c.CA_Access_Dir()
+        except:
+            flog.write("CheckAccessDirectory exception.\n")
+        else:
+            flog.write("CheckAccessDirectory finished.\n")             
+        
+        
+        try:    
+            c.CA_Concurrent_Num()
+        except:
+            flog.write("CheckConcurrentNumber exception.\n")
+        else:
+            flog.write("CheckConcurrentNumber finished.\n")   
+            
+        try:    
+            c.CA_HTTP_Method()
+        except:
+            flog.write("CheckHTTPMethod exception.\n")
+        else:
+            flog.write("CheckHTTPMethod finished.\n")    
+        
+        try:    
+            c.CA_Apache_Version()
+        except:
+            flog.write("CheckApacheVersion exception.\n")
+        else:
+            flog.write("CheckApacheVersion finished.\n")            
+            
+        
+    #try:    
+        #c.CheckConfAuth()
+    #except:
+        #flog.write("CheckConfAuth exception.\n")
+    #else:
+        #flog.write("CheckConfAuth finished.\n")     
     
-    try:    
-        c.CheckCoCurNum()
-    except:
-        flog.write("CheckCoCurNum exception.\n")
-    else:
-        flog.write("CheckCoCurNum finished.\n")     
+   
         
-    try:    
-        c.CheckMethod()
-    except:
-        flog.write("CheckMethod exception.\n")  
-    else:
-        flog.write("CheckMethod finished.\n")  
+    #try:    
+        #c.CheckMethod()
+    #except:
+        #flog.write("CheckMethod exception.\n")  
+    #else:
+        #flog.write("CheckMethod finished.\n")  
         
-    try:    
-        c.CheckToken()
-    except:
-        flog.write("CheckToken exception.\n")
-    else:
-        flog.write("CheckToken finished.\n")  
+    #try:    
+        #c.CheckToken()
+    #except:
+        #flog.write("CheckToken exception.\n")
+    #else:
+        #flog.write("CheckToken finished.\n")  
         
-    try:    
-        c.CheckErrorDoc()
-    except:
-        flog.write("CheckErrorDoc exception.\n")
-    else:
-        flog.write("CheckErrorDoc finished.\n")
+    #try:    
+        #c.CheckErrorDoc()
+    #except:
+        #flog.write("CheckErrorDoc exception.\n")
+    #else:
+        #flog.write("CheckErrorDoc finished.\n")
     
-    try:    
-        c.CheckErrorLog()
-    except:
-        flog.write("CheckErrorLog exception.\n")
-    else:
-        flog.write("CheckErrorLog finished.\n")
+    #try:    
+        #c.CheckErrorLog()
+    #except:
+        #flog.write("CheckErrorLog exception.\n")
+    #else:
+        #flog.write("CheckErrorLog finished.\n")
         
-    try:    
-        c.CheckApacheVer()
-    except:
-        flog.write("CheckApacheVer exception.\n")
-    else:
-        flog.write("CheckApacheVer finished.\n")
-        
-    try:    
-        c.CheckCGI()
-    except:
-        flog.write("CheckCGI exception.\n")
-    else:
-        flog.write("CheckCGI finished.\n")
-        
-    try:    
-        c.CheckTrace()
-    except:
-        flog.write("CheckTrace exception.\n")
-    else:
-        flog.write("CheckTrace finished.\n")
     
-    try:
-        oe = OperExcel()
-        oe.FillContent("/home/wang/Desktop/centos2.xlsx", c.PCList)    
-    except:
-        flog.write("Operate Excel exception.\n")
-    else:
-        flog.write("Operate Excel finished.\n")
         
-    flog.close()
+    #try:    
+        #c.CheckCGI()
+    #except:
+        #flog.write("CheckCGI exception.\n")
+    #else:
+        #flog.write("CheckCGI finished.\n")
+        
+    #try:    
+        #c.CheckTrace()
+    #except:
+        #flog.write("CheckTrace exception.\n")
+    #else:
+        #flog.write("CheckTrace finished.\n")
+    
+    #try:
+        #oe = OperExcel()
+        #oe.FillContent("/home/wang/Desktop/centos2.xlsx", c.PCList)    
+    #except:
+        #flog.write("Operate Excel exception.\n")
+    #else:
+        #flog.write("Operate Excel finished.\n")
+        
+    #flog.close()
     
     
 if __name__ == "__main__":
     print("start...")
-    c = CheckCentOSApache()
-    c.CA_Trace_Enable()
+    CheckApacheRun()
     
