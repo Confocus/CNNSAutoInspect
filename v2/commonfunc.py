@@ -23,7 +23,8 @@ def ComCreateResultFilePath():
     
     logpath = curpath + "log_" + logtime + ".log"
     respath = curpath + str(hostname) + str(ip) + ".txt"
-    xlpath = curpath + str(hostname) + str(ip) + ".xlsx"
+    #xlpath = curpath + str(hostname) + str(ip) + ".xlsx"
+    xlpath = curpath + "apache" + ".xlsx"
     
     return logpath, respath, xlpath
     

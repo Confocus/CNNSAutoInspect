@@ -38,7 +38,7 @@ PCTuple = namedtuple('PCTuple', 'row col content')
 
 
 
-def ConstructPCTuple(self, xlpos, xlcontent, fgpos, bf):
+def ConstructPCTuple(xlpos, xlcontent, fgpos, bf):
     '''
     xlpos:Position to be written with check result.
     xlcontent:Check result.
@@ -50,19 +50,19 @@ def ConstructPCTuple(self, xlpos, xlcontent, fgpos, bf):
     return pct1, pct2
     
 
-def GenTemplate(self, type):
+def GenTemplate(type):
     pass
 
-def RepairCell(self, path):
+def RepairCell(path):
     pass
 
-def FillContent(self, path, pctl):
+def FillContent(path, pctl):
     wb = openpyxl.load_workbook(path)
     sheet_names = wb.get_sheet_names()
     ws = wb.get_sheet_by_name(sheet_names[0])
     
-    print(type(ws))
-    print(ws)
+    #print(type(ws))
+    #print(ws)
     
     #ws.cell(row = 14, column = 8).value = "test"
     for i in pctl:
@@ -94,13 +94,13 @@ def FillContent(self, path, pctl):
     #ws.write(13, 7, "test")
     #xwb.save(path)
 
-def GetExcelInfo(self, path):
+def GetExcelInfo(path):
     f = open("D:\\tmpdump", 'w')
     rd = xlrd.open_workbook(path)
     rd.dump(f)
     f.close()   
     
-def PackExcel(self, path):
+def PackExcel(path):
     #rd = xlrd.open_workbook(path)
     #pkf = open("D:\\tmp2.pkl", 'wb')
     #print(type(rd))
@@ -114,7 +114,7 @@ def PackExcel(self, path):
     pickle.dump(wb, pkf)
     pkf.close()        
 
-def UnpackExcel(self, path):
+def UnpackExcel(path):
     pkf = open(path, 'rb')
     print(type(pkf))
     pk = pickle.load(pkf)
