@@ -242,13 +242,24 @@ class CheckCentOSApache():
         self.PCList.append(retlist[0])     
         self.PCList.append(retlist[1])
         
-    def CA_HTTPD_Log_Auth(self):
+    
+    def CA_HTTPD_Logs_Auth(self):
         '''
         The authority of httpd and the authority of logs are both considered in this 
         check item, but i don't know whether it will be devided into two items. So, 
-        this function consists of CA_HTTPD_Auth and CA_Log_Auth.
+        this function consists of CA_HTTPD_Auth and CA_Logs_Auth.
         '''
-        pass
+        
+        xlcontent, bfragile = self.CA_HTTPD_Auth()
+        xlcontent += self.CA_Logs_Auth()
+        
+        retlist = ConstructPCTuple(self, self.__xlpos[2], xlcontent, self.__fgpos[2], bfragile)
+        self.PCList.append(retlist[0])     
+        self.PCList.append(retlist[1])   
+        
+        print(xlcontent)
+        print(retlist[0][2])
+        print(retlist[1][2])    
     
     def CA_HTTPD_Auth(self, cmdline = "ls -l /usr/local/apache2/conf/httpd.conf"):#3
         
@@ -266,16 +277,17 @@ class CheckCentOSApache():
         else:
             bfragile = True
         
-        xlcontent = httpdauth.split()[0] + '\n'
+        xlcontent = "httpd.conf : " + httpdauth.split()[0] + '\n'
         
         self.LogList.append(logcontent)
-        retlist = ConstructPCTuple(self, self.__xlpos[2], xlcontent, self.__fgpos[2], bfragile)
-        self.PCList.append(retlist[0])     
-        self.PCList.append(retlist[1])        
+        #retlist = ConstructPCTuple(self, self.__xlpos[2], xlcontent, self.__fgpos[2], bfragile)
+        #self.PCList.append(retlist[0])     
+        #self.PCList.append(retlist[1])
         
+        return xlcontent, bfragile
+               
         
-        
-    def CA_Log_Auth(self, cmdline = "ls -l /usr/local/apache2/logs"):
+    def CA_Logs_Auth(self, cmdline = "ls -l /usr/local/apache2/logs"):
         
         logcontent = "\nLogs authority:\n"
         xlcontent = ""
@@ -285,6 +297,8 @@ class CheckCentOSApache():
         content = ComCompatibleList(result.readlines())  
         
         for line in content:
+            if len(line.split()) <= 2:
+                continue
             logcontent += line + '\n'
             xlcontent += line.split()[-1] + ' : ' + line.split()[0] + '\n'
             
@@ -292,16 +306,17 @@ class CheckCentOSApache():
             xlcontent = "No log."
             
         self.LogList.append(logcontent)
-        retlist = ConstructPCTuple(self, self.__xlpos[2], xlcontent, self.__fgpos[2], bfragile)
-        self.PCList.append(retlist[0])     
-        self.PCList.append(retlist[1])    
+        #retlist = ConstructPCTuple(self, self.__xlpos[2], xlcontent, self.__fgpos[2], bfragile)
+        #self.PCList.append(retlist[0])     
+        #self.PCList.append(retlist[1])    
+       
+        return  xlcontent
+         
         
-        print(logcontent)
-        print(xlcontent)
-        print(retlist[0][2])
-        print(retlist[1][2])        
-        
-        
+    
+    
+    
+    
     def CA_LOG_Auth(self):
         p = subprocess.Popen(self.__cmd[3], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         retval = p.wait()         
@@ -680,5 +695,5 @@ def CheckApacheRun():
 if __name__ == "__main__":
     print("start...")
     c = CheckCentOSApache()
-    c.CA_Log_Auth()
+    c.CA_HTTPD_Logs_Auth()
     
