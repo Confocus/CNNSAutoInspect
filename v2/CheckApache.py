@@ -267,9 +267,6 @@ class CheckCentOSApache():
         self.PCList.append(retlist[0])     
         self.PCList.append(retlist[1])   
         
-        print(xlcontent)
-        print(retlist[0][2])
-        print(retlist[1][2])    
     
     def CA_HTTPD_Auth(self, cmdline = "ls -l /usr/local/apache2/conf/httpd.conf"):#3
         
@@ -320,27 +317,7 @@ class CheckCentOSApache():
         #self.PCList.append(retlist[0])     
         #self.PCList.append(retlist[1])    
        
-        return  xlcontent
-         
-    
-    #def CA_LOG_Auth(self):
-        #p = subprocess.Popen(self.__cmd[3], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        #retval = p.wait()         
-        #content = CheckCommonFunc.CompatibleList(p.stdout.readlines())       
-        #for line in content:
-            #if line.split()[0] != "-rw-r--r--." and line.split()[0] != "-rw-r--r--.":
-                #bres = True
-                #rescontent = rescontent + line.rstrip() + '\n'
-            #f.write(line.rstrip().lstrip() + '\n')
-        #f.close()
-        
-        #if rescontent == "":
-            #rescontent = "No Setting."        
-        
-        #pct1 = PCTuple(self.__respos[2][0], self.__respos[2][1], rescontent)
-        #pct2 = PCTuple(self.__expos[2][0], self.__expos[2][1], "exist" if bres == True else "unexist")
-        #self.PCList.append(pct1)
-        #self.PCList.append(pct2)                 
+        return  xlcontent           
   
     def CA_Access_Dir(self):
         
@@ -537,8 +514,6 @@ class CheckCentOSApache():
         retlist = ConstructPCTuple(self, self.__xlpos[11], xlcontent, self.__fgpos[11], bfragile)
         self.PCList.append(retlist[0])  
         
-        print(logcontent)
-        print(retlist[0][2])
                
     
     def CA_CGI(self):#13
@@ -591,10 +566,11 @@ class CheckCentOSApache():
         retlist = ConstructPCTuple(self, self.__xlpos[12], xlcontent, self.__fgpos[12], bfragile)
         self.PCList.append(retlist[0])
         self.PCList.append(retlist[1])
-        
-        print(logcontent)
-        print(retlist[0][2])
-        print(retlist[1][2])
+    
+    def GenLog(self):
+        with open(self.respath, 'w') as ftxt:
+            for line in self.LogList:
+                ftxt.write(line)
         
 def CheckApacheRun():
     c = CheckCentOSApache()
@@ -613,7 +589,7 @@ def CheckApacheRun():
     #if os.path.exists(logpath) == True:
         #os.remove(logpath)
     
-    with open(c.logpath, 'w') as lp:
+    with open(c.logpath, 'w') as flog:
         
         try:    
             c.CA_Check_Account()
@@ -699,6 +675,8 @@ def CheckApacheRun():
             flog.write("CheckServerToken exception.\n")
         else:
             flog.write("CheckServerToken finished.\n")  
+            
+        c.GenLog()
     
     #try:
         #oe = OperExcel()

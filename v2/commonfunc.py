@@ -21,7 +21,7 @@ def ComCreateResultFilePath():
     hostname = socket.gethostname()
     ip = socket.gethostbyname(hostname)
     
-    logpath = curpath + "log_" + logtime + ".txt"
+    logpath = curpath + "log_" + logtime + ".log"
     respath = curpath + str(hostname) + str(ip) + ".txt"
     xlpath = curpath + str(hostname) + str(ip) + ".xlsx"
     
@@ -112,7 +112,7 @@ def ComGetLinuxVer():#CentOS5:Python2;CentOS6:Python2;CentOS7:Python3
     #else:
         ##print("PyVersion is 3\n")
         #verinfo = str(p.stdout.read().rstrip().lstrip(), encoding = "utf-8") #python3中,read到的是字符object，需要转换为str object
-    verinfo = CompatibleStr(p.stdout.read().rstrip().lstrip())
+    verinfo = ComCompatibleStr(p.stdout.read().rstrip().lstrip())
     #CentOS Linux release 7.3.1611 (Core) 
     #Red Hat Enterprise Linux Server release 5.4 (Tikanga)
     
