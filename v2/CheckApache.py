@@ -242,13 +242,19 @@ class CheckCentOSApache():
         self.PCList.append(retlist[0])     
         self.PCList.append(retlist[1])
         
+    def CA_HTTPD_Log_Auth(self):
+        '''
+        The authority of httpd and the authority of logs are both considered in this 
+        check item, but i don't know whether it will be devided into two items. So, 
+        this function consists of CA_HTTPD_Auth and CA_Log_Auth.
+        '''
+        pass
     
     def CA_HTTPD_Auth(self, cmdline = "ls -l /usr/local/apache2/conf/httpd.conf"):#3
         
         logcontent = "\nHTTPD configure authority:\n"
         xlcontent = ""
         bfragile = False         
-        content = []
                
         result = os.popen(cmdline)     
         httpdauth = ComCompatibleStr(result.readline())
@@ -267,11 +273,33 @@ class CheckCentOSApache():
         self.PCList.append(retlist[0])     
         self.PCList.append(retlist[1])        
         
+        
+        
+    def CA_Log_Auth(self, cmdline = "ls -l /usr/local/apache2/logs"):
+        
+        logcontent = "\nLogs authority:\n"
+        xlcontent = ""
+        bfragile = False         
+            
+        result = os.popen(cmdline)     
+        content = ComCompatibleList(result.readlines())  
+        
+        for line in content:
+            logcontent += line + '\n'
+            xlcontent += line.split()[-1] + ' : ' + line.split()[0] + '\n'
+            
+        if xlcontent == "":
+            xlcontent = "No log."
+            
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self, self.__xlpos[2], xlcontent, self.__fgpos[2], bfragile)
+        self.PCList.append(retlist[0])     
+        self.PCList.append(retlist[1])    
+        
         print(logcontent)
         print(xlcontent)
         print(retlist[0][2])
-        print(retlist[1][2])
-        
+        print(retlist[1][2])        
         
         
     def CA_LOG_Auth(self):
@@ -652,5 +680,5 @@ def CheckApacheRun():
 if __name__ == "__main__":
     print("start...")
     c = CheckCentOSApache()
-    c.CA_HTTPD_Auth()
+    c.CA_Log_Auth()
     
