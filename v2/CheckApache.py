@@ -219,7 +219,7 @@ class CheckCentOSApache():
            
     
     def CA_RootDir_Auth(self):#2
-        logcontent = "\nRootDir authority\n"
+        logcontent = "\nRootDir authority:\n"
         xlcontent = ""
         bfragile = False        
         
@@ -227,7 +227,7 @@ class CheckCentOSApache():
         #retval = p.wait()  
         #auth = CheckCommonFunc.CompatibleStr(p.stdout.read())
         result = os.popen(self.__cmd[1])  
-        rootdirauth = ComCompatibleList(result.readline())         
+        rootdirauth = ComCompatibleStr(result.readline())         
         
         logcontent += rootdirauth + '\n'
         if rootdirauth.split()[0] == "drw-------." or rootdirauth.split()[0] == "drw-------":
@@ -242,28 +242,39 @@ class CheckCentOSApache():
         self.PCList.append(retlist[0])     
         self.PCList.append(retlist[1])
         
+    
+    def CA_HTTPD_Auth(self, cmdline = "ls -l /usr/local/apache2/conf/httpd.conf"):#3
+        
+        logcontent = "\nHTTPD configure authority:\n"
+        xlcontent = ""
+        bfragile = False         
+        content = []
+               
+        result = os.popen(cmdline)     
+        httpdauth = ComCompatibleStr(result.readline())
+        
+        logcontent += httpdauth
+        
+        if httpdauth.split()[0] == "-rw-------" or httpdauth.split()[0] == "-rw-----.":
+            pass
+        else:
+            bfragile = True
+        
+        xlcontent = httpdauth.split()[0] + '\n'
+        
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self, self.__xlpos[2], xlcontent, self.__fgpos[2], bfragile)
+        self.PCList.append(retlist[0])     
+        self.PCList.append(retlist[1])        
+        
         print(logcontent)
         print(xlcontent)
         print(retlist[0][2])
         print(retlist[1][2])
         
-    
-    def CheckConfAuth(self):#3
-        rescontent = ""
-        bres = False
-        content = []
-        f = open(self.mwpath, "a+")
-        f.write("*************************ConfFile Authority*************************\n")        
-        p = subprocess.Popen(self.__cmd[2], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p.wait()         
-        auth = CheckCommonFunc.CompatibleStr(p.stdout.read())
-        f.write(auth + '\n')
-        rescontent = auth.rstrip() + '\n'
-        if auth.split()[0] == "-rw-------" or auth.split()[0] == "-rw-----.":
-            pass
-        else:
-            bres = True
-            
+        
+        
+    def CA_LOG_Auth(self):
         p = subprocess.Popen(self.__cmd[3], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         retval = p.wait()         
         content = CheckCommonFunc.CompatibleList(p.stdout.readlines())       
@@ -280,7 +291,7 @@ class CheckCentOSApache():
         pct1 = PCTuple(self.__respos[2][0], self.__respos[2][1], rescontent)
         pct2 = PCTuple(self.__expos[2][0], self.__expos[2][1], "exist" if bres == True else "unexist")
         self.PCList.append(pct1)
-        self.PCList.append(pct2)         
+        self.PCList.append(pct2)                 
   
     def CA_Access_Dir(self):
         
@@ -641,5 +652,5 @@ def CheckApacheRun():
 if __name__ == "__main__":
     print("start...")
     c = CheckCentOSApache()
-    c.CA_RootDir_Auth()
+    c.CA_HTTPD_Auth()
     

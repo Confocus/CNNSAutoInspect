@@ -137,7 +137,7 @@ def ComGetLinuxVer():#CentOS5:Python2;CentOS6:Python2;CentOS7:Python3
 
 
 def ComCompatibleStr(s):#Sheild the difference between py2str and py3str
-    pyVer = GetPyVersion()
+    pyVer = ComGetPyVersion()
     if pyVer == 2:
         s = s.rstrip().lstrip()
     else:
