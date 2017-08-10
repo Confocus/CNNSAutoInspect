@@ -318,24 +318,24 @@ class CheckCentOSApache():
         return  xlcontent
          
     
-    def CA_LOG_Auth(self):
-        p = subprocess.Popen(self.__cmd[3], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p.wait()         
-        content = CheckCommonFunc.CompatibleList(p.stdout.readlines())       
-        for line in content:
-            if line.split()[0] != "-rw-r--r--." and line.split()[0] != "-rw-r--r--.":
-                bres = True
-                rescontent = rescontent + line.rstrip() + '\n'
-            f.write(line.rstrip().lstrip() + '\n')
-        f.close()
+    #def CA_LOG_Auth(self):
+        #p = subprocess.Popen(self.__cmd[3], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        #retval = p.wait()         
+        #content = CheckCommonFunc.CompatibleList(p.stdout.readlines())       
+        #for line in content:
+            #if line.split()[0] != "-rw-r--r--." and line.split()[0] != "-rw-r--r--.":
+                #bres = True
+                #rescontent = rescontent + line.rstrip() + '\n'
+            #f.write(line.rstrip().lstrip() + '\n')
+        #f.close()
         
-        if rescontent == "":
-            rescontent = "No Setting."        
+        #if rescontent == "":
+            #rescontent = "No Setting."        
         
-        pct1 = PCTuple(self.__respos[2][0], self.__respos[2][1], rescontent)
-        pct2 = PCTuple(self.__expos[2][0], self.__expos[2][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)                 
+        #pct1 = PCTuple(self.__respos[2][0], self.__respos[2][1], rescontent)
+        #pct2 = PCTuple(self.__expos[2][0], self.__expos[2][1], "exist" if bres == True else "unexist")
+        #self.PCList.append(pct1)
+        #self.PCList.append(pct2)                 
   
     def CA_Access_Dir(self):
         
@@ -437,12 +437,6 @@ class CheckCentOSApache():
         self.PCList.append(retlist[0])
         self.PCList.append(retlist[1])          
         
-        print(logcontent)
-        print(xlcontent)
-        print(retlist[0][2])
-        print(retlist[1][2])
-       
-        
     
     def CA_ErrorDoc(self):#10
         '''
@@ -470,9 +464,51 @@ class CheckCentOSApache():
         self.PCList.append(retlist[0])
         self.PCList.append(retlist[1]) 
 
-   
-    def CheckErrorLog(self):#11
-        pass
+        
+        
+    def CA_Logs_ErrorLogs_Content(self):
+        
+        bfragile = False
+        xlcontent = self.CA_Logs_Content()
+        xlcontent += self.CA_ErrorLogs_Content()
+        
+        retlist = ConstructPCTuple(self, self.__xlpos[10], xlcontent, self.__fgpos[10], bfragile)
+        self.PCList.append(retlist[0])
+        
+    
+    def CA_Logs_Content(self, cmdline = "ls -l /usr/local/apache2/logs"):
+        
+        logcontent = "\nLogs content:\n"
+        xlcontent = ""
+        bfragile = False        
+        
+        result = os.popen(cmdline)     
+        content = ComCompatibleList(result.readlines())  
+        
+        for line in content:
+            logcontent += line + '\n'
+        
+        xlcontent = logcontent
+        
+        self.LogList.append(logcontent)
+        return xlcontent
+        
+    def CA_ErrorLogs_Content(self, cmdline = "cat /usr/local/apache2/logs/error_log"):
+        
+        logcontent = "\nErrorlogs content:\n"
+        xlcontent = ""
+        bfragile = False     
+        
+        result = os.popen(cmdline)     
+        content = ComCompatibleList(result.readlines())  
+        
+        for line in content:
+            logcontent += line + '\n'
+            
+        xlcontent = logcontent
+        
+        return xlcontent
+        
     
     def CheckApacheVer(self):#12
         rescontent = ""
@@ -684,5 +720,5 @@ def CheckApacheRun():
 if __name__ == "__main__":
     print("start...")
     c = CheckCentOSApache()
-    c.CA_Server_Token()
+    c.CA_Logs_ErrorLogs_Content()
     
