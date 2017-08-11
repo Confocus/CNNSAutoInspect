@@ -419,52 +419,7 @@ class CheckLinux(object):
         self.PCList.append(retlist[0])    
         self.PCList.append(retlist[1]) 
         
-        print(logcontent)
-        print(retlist[0][2])
-        print(retlist[1][2])
-        #rescontent = ""
-        #bres = False        
-        #content = []
-        #finish = []
-        #p = subprocess.Popen(self.AllCommands[6], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        #retval = p.wait()   
-        #f = open(self.respath, "a+")
-        #f.write("*************************Root Login*************************\n") 
-        #ver = self.GetLinuxVer()
-        #if int(ver) == 5:
-            #content = copy.deepcopy(p.stdout.readlines())
-        #else:
-            #for line in p.stdout.readlines():
-                #line = str(line, encoding = "utf-8")
-                #content.append(line.rstrip())
-        #content = CheckCommonFunc.CompatibleList(p.stdout.readlines())
-                
-        #for line in content:
-            #if "PermitRootLogin" in line:
-                #log = line.lstrip().rstrip()
-                
-                ##print(log)
-                #if(log[0] == '#'):
-                    #continue
-                #else:
-                    #finish.append(log)
-                    #rescontent = rescontent + log +'\n'
-                    #f.write(log + "\n")
-        #if(len(finish) == 0):
-            #rescontent = "Default setting.\n"
-            #bres = True
-            #f.write("Default setting.\n")
-        ##print("*************************Root Login*************************") 
-        #f.close()
-        
-        #pct1 = PCTuple(self.__respos[6][0], self.__respos[6][1], rescontent)
-        #pct2 = PCTuple(self.__expos[6][0], self.__expos[6][1], "exist" if bres == True else "unexist")
-        #self.PCList.append(pct1)
-        #self.PCList.append(pct2)      
-        #print(rescontent)
-        
-            
-##############################################################      CheckPasswdComplexity       ########################################################################################          
+                        
     #Pass CentOS5_i386、CentOS6、CentOS7                
     def CheckPasswdComplexity(self):
         #print("CheckPasswdComplexity start...")
@@ -558,15 +513,44 @@ class CheckLinux(object):
         
 ##############################################################      CheckPasswdComplexity       ########################################################################################          
     #Pass CentOS5_i386、CentOS6、CentOS7
-    def PasswordTimeLimit(self):
-        rescontent = ""
-        bres = False        
-        content = []
-        MaxDays = 0
-        p = subprocess.Popen(self.AllCommands[8], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p.wait()
-        f = open(self.respath, "a+")
-        f.write("*************************Password Maxdays*************************\n")
+    def CL_Pass_Maxdays(self, cmdline = "cat /etc/login.defs"):
+        
+        logcontent = "\nPassword time limit:\n"
+        xlcontent = ""
+        bfragile = False         
+    
+        result = os.popen(cmdline)  
+        content = ComCompatibleList(result.readlines())            
+        
+        for line in content:
+            if len(line.lstrip().rstrip()) == 0:
+                continue
+            if line.lstrip()[0] == '#':
+                continue
+            if "PASS_MAX_DAYS" in line:
+                logcontent += line + '\n'
+                xlcontent += line.split()[1]
+                if int(line.split()[1]) < 90:
+                    bfragile = True
+                break
+            
+            
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self.__xlpos[8], xlcontent, self.__fgpos[8], bfragile)
+        self.PCList.append(retlist[0])    
+        self.PCList.append(retlist[1])
+        
+        print(logcontent)
+        print(retlist[0][2])
+        print(retlist[1][2])
+        #rescontent = ""
+        #bres = False        
+        #content = []
+        #MaxDays = 0
+        #p = subprocess.Popen(self.AllCommands[8], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        #retval = p.wait()
+        #f = open(self.respath, "a+")
+        #f.write("*************************Password Maxdays*************************\n")
         #ver = self.GetLinuxVer()
         #if int(ver) == 5:
             #content = copy.deepcopy(p.stdout.readlines())
@@ -574,29 +558,29 @@ class CheckLinux(object):
             #for line in p.stdout.readlines():
                 #line = str(line, encoding = "utf-8")
                 #content.append(line.rstrip())     
-        content = CheckCommonFunc.CompatibleList(p.stdout.readlines())
-        for line in content:
-            if "PASS_MAX_DAYS" in line:
-                #print(line)
-                log = line.lstrip().rstrip()
-                if log[0] == '#':
-                    continue
-                else:
-                    MaxDays = int(log.split()[1])
-                    break
-        if MaxDays == 0:
-            bres = True
-            rescontent = "Default\n"
-            f.write("PASS_MAX_DAYS:Default\n")
-        else:
-            rescontent = str(MaxDays) + "\n"
-            f.write("PASS_MAX_DAYS:" + str(MaxDays) + "\n")
-        f.close()
+        #content = CheckCommonFunc.CompatibleList(p.stdout.readlines())
+        #for line in content:
+            #if "PASS_MAX_DAYS" in line:
+                ##print(line)
+                #log = line.lstrip().rstrip()
+                #if log[0] == '#':
+                    #continue
+                #else:
+                    #MaxDays = int(log.split()[1])
+                    #break
+        #if MaxDays == 0:
+            #bres = True
+            #rescontent = "Default\n"
+            #f.write("PASS_MAX_DAYS:Default\n")
+        #else:
+            #rescontent = str(MaxDays) + "\n"
+            #f.write("PASS_MAX_DAYS:" + str(MaxDays) + "\n")
+        #f.close()
         
-        pct1 = PCTuple(self.__respos[8][0], self.__respos[8][1], rescontent)
-        pct2 = PCTuple(self.__expos[8][0], self.__expos[8][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)         
+        #pct1 = PCTuple(self.__respos[8][0], self.__respos[8][1], rescontent)
+        #pct2 = PCTuple(self.__expos[8][0], self.__expos[8][1], "exist" if bres == True else "unexist")
+        #self.PCList.append(pct1)
+        #self.PCList.append(pct2)         
         #print(rescontent)
             
 ##############################################################      AuthenFailedTimes       ########################################################################################
@@ -1257,5 +1241,5 @@ def Run():
 if __name__ == "__main__":
     print("start...")
     c = CheckLinux()
-    c.CL_PermitRoot_Login()
+    c.CL_Pass_Maxdays()
     
