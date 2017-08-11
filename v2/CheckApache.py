@@ -596,97 +596,96 @@ def CheckApacheRun():
         #os.remove(logpath)
     
     with open(c.logpath, 'w') as flog:
-        print("open success")
-        #c.CA_Check_Account()
+        
         try:    
             c.CA_Check_Account()
-        except:
-            flog.write("CheckAccount exception.\n")
+        except Exception as e:
+            flog.write("CheckAccount exception:" + repr(e) + "\n")
         else:
             flog.write("CheckAccount finished.\n")    
             
         try:    
             c.CA_RootDir_Auth()
-        except:
-            flog.write("CheckRootAuth exception.\n")
+        except Exception as e:
+            flog.write("CheckRootAuth exception:" + repr(e) + "\n")
         else:
             flog.write("CheckRootAuth finished.\n")            
         
         try:    
             c.CA_HTTPD_Logs_Auth()
-        except:
-            flog.write("CheckHTTPDLogs exception.\n")
+        except Exception as e:
+            flog.write("CheckHTTPDLogs exception:" + repr(e) + "\n")
         else:
             flog.write("CheckHTTPDLogs finished.\n")  
             
         try:    
             c.CA_Access_Dir()
-        except:
-            flog.write("CheckAccessDirectory exception.\n")
+        except Exception as e:
+            flog.write("CheckAccessDirectory exception:" + repr(e) + "\n")
         else:
             flog.write("CheckAccessDirectory finished.\n")             
         
         
         try:    
             c.CA_Concurrent_Num()
-        except:
-            flog.write("CheckConcurrentNumber exception.\n")
+        except Exception as e:
+            flog.write("CheckConcurrentNumber exception:" + repr(e) + "\n")
         else:
             flog.write("CheckConcurrentNumber finished.\n")   
             
         try:    
             c.CA_HTTP_Method()
-        except:
-            flog.write("CheckHTTPMethod exception.\n")
+        except Exception as e:
+            flog.write("CheckHTTPMethod exception:" + repr(e) + "\n")
         else:
             flog.write("CheckHTTPMethod finished.\n")    
         
         try:    
             c.CA_Apache_Version()
-        except:
-            flog.write("CheckApacheVersion exception.\n")
+        except Exception as e:
+            flog.write("CheckApacheVersion exception:" + repr(e) + "\n")
         else:
             flog.write("CheckApacheVersion finished.\n")            
             
         try:    
             c.CA_ErrorDoc()
-        except:
-            flog.write("CheckErrorDoc exception.\n")
+        except Exception as e:
+            flog.write("CheckErrorDoc exception:" + repr(e) + "\n")
         else:
             flog.write("CheckErrorDoc finished.\n")  
             
         try:    
             c.CA_Logs_ErrorLogs_Content()
-        except:
-            flog.write("CheckErrorLogsContent exception.\n")
+        except Exception as e:
+            flog.write("CheckErrorLogsContent exception:" + repr(e) + "\n")
         else:
             flog.write("CheckErrorLogsContent finished.\n")          
         
         try:    
             c.CA_CGI()
-        except:
-            flog.write("CheckCGI exception.\n")
+        except Exception as e:
+            flog.write("CheckCGI exception:" + repr(e) + "\n")
         else:
             flog.write("CheckCGI finished.\n")  
             
         try:    
             c.CA_Trace_Enable()
-        except:
-            flog.write("CheckTraceEnable exception.\n")
+        except Exception as e:
+            flog.write("CheckTraceEnable exception:" + repr(e) + "\n")
         else:
             flog.write("CheckTraceEnable finished.\n")        
             
         try:    
             c.CA_Server_Token()
-        except:
-            flog.write("CheckServerToken exception.\n")
+        except Exception as e:
+            flog.write("CheckServerToken exception:" + repr(e) + "\n")
         else:
             flog.write("CheckServerToken finished.\n")  
             
         try:
             FillContent(c.xlpath, c.PCList)
-        except:
-            flog.write("Operate Excel exception.\n")
+        except Exception as e:
+            flog.write("Operate Excel exception:" + repr(e) + "\n")
         else:
             flog.write("Operate Excel finished.\n")            
             

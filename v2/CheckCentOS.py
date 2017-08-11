@@ -250,11 +250,8 @@ class CheckLinux(object):
         logcontent = "\nLog file authority:\n"
         xlcontent = ""
         bfragile = False
-        
-        rescontent = ""
-        bres = False        
+             
         count = 0
-        content = []
         finish = []
         
         result = os.popen(cmdline)  
@@ -287,25 +284,9 @@ class CheckLinux(object):
         self.PCList.append(retlist[0])
         self.PCList.append(retlist[1])         
         
-        print(logcontent)
-        print(retlist[0][2])
-        print(retlist[1][2])
-        #p = subprocess.Popen(self.AllCommands[26], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        #retval = p.wait()  
-        #authadm = CheckCommonFunc.CompatibleList(p.stdout.read())
-        #rescontent = rescontent + "/var/adm/authlog:" + authadm.rstrip() + '\n'
-        #p = subprocess.Popen(self.AllCommands[27], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        #retval = p.wait()  
-        #authadm = CheckCommonFunc.CompatibleList(p.stdout.read())
-        #rescontent = rescontent + "/var/adm/sylog:" + authadm.rstrip() + '\n'
-        
-        #f.close()           
-        
-        #pct1 = PCTuple(self.__respos[1][0], self.__respos[1][1], rescontent)
-        #pct2 = PCTuple(self.__expos[1][0], self.__expos[1][1], "exist" if bres == True else "unexist")
-        #self.PCList.append(pct1)
-        #self.PCList.append(pct2)      
-        ##print(rescontent)
+        #print(logcontent)
+        #print(retlist[0][2])
+        #print(retlist[1][2])
         
         
     def CheckNetLogServConf(self):
@@ -341,22 +322,35 @@ class CheckLinux(object):
         self.PCList.append(pct1)
         #print(rescontent)
         
-    def CheckAccountAuth(self):
-        content = []
-        rescontent = ""
-        f = open(self.respath, "a+")
-        f.write("*************************Account Authority*************************\n")           
-        p = subprocess.Popen(self.AllCommands[4], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)   #"cat \/etc\/passwd"
-        retval = p.wait()      
-        content = CheckCommonFunc.CompatibleList(p.stdout.readlines())
-        for line in content:
-            rescontent = rescontent + line.rstrip()+ '\n'
-            f.write(line.rstrip() + '\n')
-        f.close()
+    def CL_PasswdUser(self, cmdline = "cat /etc/passwd"):
+        '''
+        注册名：口令：用户标识号：组标识号：用户名：用户主目录：命令解释程序 
+        '''
         
-        pct1 = PCTuple(self.__respos[4][0], self.__respos[4][1], rescontent)
-        self.PCList.append(pct1)        
-        #print(rescontent)
+        logcontent = "\nPasswd user:\n"
+        xlcontent = ""
+        bfragile = False        
+        userset = set()
+        
+        result = os.popen(cmdline)  
+        content = ComCompatibleList(result.readlines())  
+        
+        for line in content:
+            logcontent += line
+            userset.add(line.split(':')[0])
+        
+        for i in userset:
+            xlcontent += i + '\n'
+        
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self.__xlpos[4], xlcontent, self.__fgpos[4], bfragile)
+        self.PCList.append(retlist[0])
+        #self.PCList.append(retlist[1]) 
+        
+        print(logcontent)
+        print(retlist[0][2])
+        
+        return xlcontent
         
 ##############################################################      CheckUselessAccount       ########################################################################################          
     #Pass CentOS5_i386、CentOS6、CentOS7    
@@ -1241,5 +1235,5 @@ def Run():
 if __name__ == "__main__":
     print("start...")
     c = CheckLinux()
-    c.CL_Logfile_Auth()
+    c.CL_PasswdUser()
     
