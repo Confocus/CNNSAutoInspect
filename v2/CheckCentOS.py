@@ -315,40 +315,7 @@ class CheckLinux(object):
         retlist = ConstructPCTuple(self.__xlpos[3], xlcontent, self.__fgpos[3], bfragile)
         self.PCList.append(retlist[0])
         
-        print(retlist[0][2])
         
-        #self.PCList.append(retlist[1])         
-        #rescontent = ""
-        #bres = False        
-        #content = []
-        #bstatus = False
-        #argcmd = ""
-        #f = open(self.respath, "a+")
-        #f.write("*************************Net Log Server*************************\n")   
-            
-        ##ver = CheckCommonFunc.GetLinuxVer()
-        ##if int(ver) == 5:
-            ##argcmd = self.AllCommands[3]        
-        ##else:
-            ##argcmd = self.AllCommands[0] 
-        ##p = subprocess.Popen(self.AllCommands[0], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        ##retval = p.wait()             
-        
-        ##content = CheckCommonFunc.CompatibleList(p.stdout.readlines())
-        #for line in content:
-            #if "*.* @" in line and line.lstrip()[0] != '#':
-                ##print(line)
-                #rescontent = rescontent + line.rstrip()+ '\n'
-                #f.write(line.rstrip() + '\n')
-                #bstatus = True
-        #if bstatus == False:
-            #rescontent = "Default setting" + '\n'
-            #f.write("Default setting" + '\n')            
-        #f.close()
-        
-        #pct1 = PCTuple(self.__respos[3][0], self.__respos[3][1], rescontent)
-        #self.PCList.append(pct1)
-        #print(rescontent)
         
         
     def CL_PasswdUser(self, cmdline = "cat /etc/passwd"):
@@ -424,65 +391,45 @@ class CheckLinux(object):
         retlist = ConstructPCTuple(self.__xlpos[5], xlcontent, self.__fgpos[5], bfragile)
         self.PCList.append(retlist[0])        
         
-        #print(retlist[0][2])
-        
-        
-##############################################################      CheckUselessAccount       ########################################################################################          
+                 
     #Pass CentOS5_i386、CentOS6、CentOS7    
-    def CheckUselessAccount(self):
-        rescontent = ""
-        bres = False        
-        content = []
-        p1 = subprocess.Popen(self.AllCommands[4], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p1.wait()         
-        f = open(self.respath, "a+")
-        f.write("*************************All Passwd*************************\n")  
-        #ver = self.GetLinuxVer()
-        #if int(ver) == 5:
-            #content = copy.deepcopy(p1.stdout.readlines())
-        #else:
-            #for line in p1.stdout.readlines():
-                #line = str(line, encoding = "utf-8")
-                #content.append(line.rstrip())  
-        content = CheckCommonFunc.CompatibleList(p1.stdout.readlines())
-                
-        for line in content:
-            rescontent = rescontent + line.rstrip() + '\n'
-            f.write(line.rstrip() + '\n')
+    def CL_PermitRoot_Login(self, cmdline = "cat /etc/ssh/sshd_config"):
+        logcontent = "\nPermit root login:\n"
+        xlcontent = ""
+        bfragile = False         
         
-        content = []
-        p2 = subprocess.Popen(self.AllCommands[5], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p2.wait()
-        
-        f.write("*************************All Shadow*************************\n") 
-        #if int(ver) == 5:
-            #content = copy.deepcopy(p2.stdout.readlines())
-        #else:
-            #for line in p2.stdout.readlines():
-                #line = str(line, encoding = "utf-8")
-                #content.append(line.rstrip())
-        content = CheckCommonFunc.CompatibleList(p2.stdout.readlines())
+        result = os.popen(cmdline)  
+        content = ComCompatibleList(result.readlines())         
         
         for line in content:
-            rescontent = rescontent + line.rstrip() + '\n'
-            f.write(line.rstrip() + '\n')      
-        f.close()
-
-        pct1 = PCTuple(self.__respos[5][0], self.__respos[5][1], rescontent)
-        self.PCList.append(pct1)
-        #print(rescontent)
-
-##############################################################      CheckPermitRootLogin       ########################################################################################          
-    #Pass CentOS5_i386、CentOS6、CentOS7    
-    def CheckPermitRootLogin(self):
-        rescontent = ""
-        bres = False        
-        content = []
-        finish = []
-        p = subprocess.Popen(self.AllCommands[6], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p.wait()   
-        f = open(self.respath, "a+")
-        f.write("*************************Root Login*************************\n") 
+            if len(line.lstrip().rstrip()) == 0:
+                continue
+            if line.lstrip()[0] == '#':
+                continue
+            if "PermitRootLogin" in line:
+                logcontent += line + '\n'
+                xlcontent += line
+                if line.split()[1] == "yes":
+                    bfragile = True
+                break
+        
+        
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self.__xlpos[6], xlcontent, self.__fgpos[6], bfragile)
+        self.PCList.append(retlist[0])    
+        self.PCList.append(retlist[1]) 
+        
+        print(logcontent)
+        print(retlist[0][2])
+        print(retlist[1][2])
+        #rescontent = ""
+        #bres = False        
+        #content = []
+        #finish = []
+        #p = subprocess.Popen(self.AllCommands[6], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        #retval = p.wait()   
+        #f = open(self.respath, "a+")
+        #f.write("*************************Root Login*************************\n") 
         #ver = self.GetLinuxVer()
         #if int(ver) == 5:
             #content = copy.deepcopy(p.stdout.readlines())
@@ -490,30 +437,30 @@ class CheckLinux(object):
             #for line in p.stdout.readlines():
                 #line = str(line, encoding = "utf-8")
                 #content.append(line.rstrip())
-        content = CheckCommonFunc.CompatibleList(p.stdout.readlines())
+        #content = CheckCommonFunc.CompatibleList(p.stdout.readlines())
                 
-        for line in content:
-            if "PermitRootLogin" in line:
-                log = line.lstrip().rstrip()
+        #for line in content:
+            #if "PermitRootLogin" in line:
+                #log = line.lstrip().rstrip()
                 
-                #print(log)
-                if(log[0] == '#'):
-                    continue
-                else:
-                    finish.append(log)
-                    rescontent = rescontent + log +'\n'
-                    f.write(log + "\n")
-        if(len(finish) == 0):
-            rescontent = "Default setting.\n"
-            bres = True
-            f.write("Default setting.\n")
-        #print("*************************Root Login*************************") 
-        f.close()
+                ##print(log)
+                #if(log[0] == '#'):
+                    #continue
+                #else:
+                    #finish.append(log)
+                    #rescontent = rescontent + log +'\n'
+                    #f.write(log + "\n")
+        #if(len(finish) == 0):
+            #rescontent = "Default setting.\n"
+            #bres = True
+            #f.write("Default setting.\n")
+        ##print("*************************Root Login*************************") 
+        #f.close()
         
-        pct1 = PCTuple(self.__respos[6][0], self.__respos[6][1], rescontent)
-        pct2 = PCTuple(self.__expos[6][0], self.__expos[6][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)      
+        #pct1 = PCTuple(self.__respos[6][0], self.__respos[6][1], rescontent)
+        #pct2 = PCTuple(self.__expos[6][0], self.__expos[6][1], "exist" if bres == True else "unexist")
+        #self.PCList.append(pct1)
+        #self.PCList.append(pct2)      
         #print(rescontent)
         
             
@@ -1310,5 +1257,5 @@ def Run():
 if __name__ == "__main__":
     print("start...")
     c = CheckLinux()
-    c.CL_NetLogServer_Conf()
+    c.CL_PermitRoot_Login()
     
