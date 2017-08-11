@@ -322,13 +322,15 @@ class CheckLinux(object):
         self.PCList.append(pct1)
         #print(rescontent)
         
+        
     def CL_PasswdUser(self, cmdline = "cat /etc/passwd"):
         '''
         注册名：口令：用户标识号：组标识号：用户名：用户主目录：命令解释程序 
+        This function is only used to get the user of passwd.
         '''
         
         logcontent = "\nPasswd user:\n"
-        xlcontent = ""
+        xlcontent = "passwd:"
         bfragile = False        
         userset = set()
         
@@ -340,17 +342,67 @@ class CheckLinux(object):
             userset.add(line.split(':')[0])
         
         for i in userset:
-            xlcontent += i + '\n'
+            xlcontent += i + ';'
+        xlcontent += '\n'
         
         self.LogList.append(logcontent)
-        retlist = ConstructPCTuple(self.__xlpos[4], xlcontent, self.__fgpos[4], bfragile)
-        self.PCList.append(retlist[0])
-        #self.PCList.append(retlist[1]) 
-        
-        print(logcontent)
-        print(retlist[0][2])
         
         return xlcontent
+    
+    def CL_PasswdUser_Caller(self):
+        '''
+        Consider that PasswdUser maybe called with another function, I define this caller function 
+        to parse the return of CL_PasswdUser.
+        '''
+        bfragile = False
+        
+        xlcontent = self.CL_PasswdUser()
+        retlist = ConstructPCTuple(self.__xlpos[4], xlcontent, self.__fgpos[4], bfragile)
+        self.PCList.append(retlist[0])        
+        
+    
+    def CL_ShadowUser(self, cmdline = "cat /etc/shadow"):
+        ''' 
+        This function is only used to get the user of shadow.
+        ''' 
+        
+        logcontent = "\nShadow user:\n"
+        xlcontent = "shadow:"
+        bfragile = False        
+        userset = set() 
+        
+        result = os.popen(cmdline)  
+        content = ComCompatibleList(result.readlines())  
+        
+        for line in content:
+            logcontent += line
+            userset.add(line.split(':')[0])
+        
+        for i in userset:
+            xlcontent += i + ';'
+        xlcontent += '\n'    
+        
+        self.LogList.append(logcontent)
+        #retlist = ConstructPCTuple(self.__xlpos[5], xlcontent, self.__fgpos[5], bfragile)
+        #self.PCList.append(retlist[0])
+    
+        #print(logcontent)
+        #print(retlist[0][2])
+    
+        return xlcontent    
+    
+    def CL_PasswdShadowUser_Caller(self):
+        
+        bfragile = False
+        
+        xlcontent = self.CL_PasswdUser()
+        xlcontent += self.CL_ShadowUser()
+        
+        retlist = ConstructPCTuple(self.__xlpos[5], xlcontent, self.__fgpos[5], bfragile)
+        self.PCList.append(retlist[0])        
+        
+        print(retlist[0][2])
+        
         
 ##############################################################      CheckUselessAccount       ########################################################################################          
     #Pass CentOS5_i386、CentOS6、CentOS7    
@@ -1235,5 +1287,5 @@ def Run():
 if __name__ == "__main__":
     print("start...")
     c = CheckLinux()
-    c.CL_PasswdUser()
+    c.CL_PasswdShadowUser_Caller()
     

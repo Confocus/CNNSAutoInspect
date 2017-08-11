@@ -55,6 +55,7 @@ def GenTemplate(type):
 
 def RepairCell(path):
     pass
+    
 
 def FillContent(path, pctl):
     wb = openpyxl.load_workbook(path)
@@ -82,17 +83,7 @@ def FillContent(path, pctl):
     ws.merge_cells('A8:K8')
     ws.merge_cells('A12:K12')
     wb.save(path)
-    #xrd = xlrd.open_workbook(path)
-    #wksheet = xrd.sheets()[0]
-    #nrow = wksheet.nrows
-    #ncol = wksheet.ncols
-    #print(nrow)
-    #print(ncol)
-    #wksheet.write(13, 7, content)
-    #xwb = copy(xrd)
-    #ws = xwb.get_sheet(0)
-    #ws.write(13, 7, "test")
-    #xwb.save(path)
+    
 
 def GetExcelInfo(path):
     f = open("D:\\tmpdump", 'w')
@@ -101,12 +92,6 @@ def GetExcelInfo(path):
     f.close()   
     
 def PackExcel(path):
-    #rd = xlrd.open_workbook(path)
-    #pkf = open("D:\\tmp2.pkl", 'wb')
-    #print(type(rd))
-    #pickle.dump(rd, pkf)
-    #pkf.close()
-    #wt = xlwt.Workbook(path)
     rd = xlrd.open_workbook(path)
     wb = copy(rd)
     pkf = open("D:\\tmp2.pkl", 'wb')
