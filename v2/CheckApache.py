@@ -66,8 +66,10 @@ class CheckCentOSApache():
     
     def __init__(self):
         
-        #self.httpditem = ["Directory", "/usr/local/apache2/cgi-bin"]
+        self.PCList = []
+        self.LogList = []        
         self.httpdpath = "/usr/local/apache2/conf/httpd.conf"
+        
         self.__cmd = [
             "ps -ef|grep httpd",
             "ls -ld \/usr\/local\/apache2",
@@ -76,8 +78,7 @@ class CheckCentOSApache():
             "cat /usr/local/apache2/logs/error_log",##################5
             "./apachectl -v"
         ]
-        self.PCList = []
-        self.LogList = []
+        
         self.__xlpos = [(14 ,8), #0
                     (15 ,8),
                     (16, 8),
@@ -92,6 +93,7 @@ class CheckCentOSApache():
                     (25, 8),
                     (26, 8),#12
                     (27, 8)]
+        
         self.__fgpos = [(14 ,10), #0
                    (15 ,10),
                    (16, 10),
@@ -681,13 +683,12 @@ def CheckApacheRun():
         else:
             flog.write("CheckServerToken finished.\n")  
             
-                 
-        #try:
-            #FillContent("/home/wang/Desktop/apache.xlsx", c.PCList)
-        #except:
-            #flog.write("Operate Excel exception.\n")
-        #else:
-            #flog.write("Operate Excel finished.\n")            
+        try:
+            FillContent(c.xlpath, c.PCList)
+        except:
+            flog.write("Operate Excel exception.\n")
+        else:
+            flog.write("Operate Excel finished.\n")            
             
     c.GenTxtLog()
     

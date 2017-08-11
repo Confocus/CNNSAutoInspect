@@ -1,4 +1,36 @@
 #coding=utf-8
+
+'''
+1、使用命令“cat /etc/syslog.conf”查看记录*.info;mail.none;authpriv.none;cron.none /var/log/messages
+authpriv.* /var/log/secure
+mail.*   /var/log/maillog 
+cron.*    /var/log/cron
+配置是否存在，和使用命令“last   /var/log/wtmp”查看记录是否存在日志内容。
+2、使用#ls  -l  /var/log查看的目录下日志文件的权限
+3、访谈系统管理员是否定期（至少3个月一次转储，并至少保存6个月）
+4、使用命令“cat /etc/syslog.conf”查看：*.* @xx.xx.xx.xx（xx为服务器ip地址）参数是否正确。
+5、使用命令“cat  /etc/passwd ”查看并记录系统帐户列表
+6、使用命令“cat  /etc/passwd和cat  /etc/shadow”查看并记录系统帐户情况。
+7、使用命令“cat   /etc/ssh/sshd_config”查看并记录PermitRootLogin配置情况。
+8、使用命令“cat /etc/pam.d/passwd” 查看并记录password    requisite  pam_passwdqc.so  enforce=everyone
+password   requisite  pam_cracklib.so  minlen=8 lcredit=-1 ucredit=-1 ocredit=-1 dcredit=-1   pam_stack.so
+password    include      system-auth
+密码复杂度配置情况。
+9、使用命令“cat /etc/login.defs”查看并记录PASS_MAX_DAYS的值。
+10、使用命令“cat /etc/pam.d/login”查看并记录auth      required  pam_tally2.so   deny=6  lock_time=1800 even_deny_root  root_unlock_time=1800
+认证失败锁定配置。
+11、使用命令“cat /etc/pam.d/passwd”查看并记录password    requisite  pam_unix.so remember的值。
+12、使用命令“ls -l /etc/passwd”，“/etc/shadow”“/etc/group”查看并记录权限是否为-rw-r—r—、-r--------、-rw-r—r— 。
+13、使用命令“cat  /etc/bashrc”查看并记录umask的值是否为027
+14、使用命令“ps -elf|grep telnet”查看记录是否存在telnet服务进程，“ps -elf|grep ssh”查看是否存在ssh服务进程。
+15、使用漏洞扫描器对linux系统进行扫描，记录是否存在未进行更新漏洞。
+16、使用命令“cat  /etc/hosts.allow和/etc/hosts.deny”查看并记录相关配置。
+17、使用命令“cat   /etc/profile”查看并记录是否存在TIMEOUT=300；export TIMEOUT的配置
+18、使用命令chkconfig --list name查看并记录各服务使用情况。
+19、使用命令“cat /etc/ntp.conf”查看ntp 的配置文件是否添加NTP服务器IP地址。
+20、使用命令“cat /etc/resolv.conf”来查看DNS服务器ip地址是否为企业内部DNS服务器ip地址。
+'''
+
 import subprocess
 import os
 import time
@@ -7,7 +39,7 @@ import copy
 
 import CheckCommonFunc
 from GenExcel import PCTuple, OperExcel
-from CheckCommonFunc import CentOSException
+from commonfunc import *
 #from XXX import XXX as XXX
 '''Page1'''
 ##############################################################      New idea       ########################################################################################
@@ -23,12 +55,13 @@ from CheckCommonFunc import CentOSException
 #Redhat5 = CentOS5;RedHat6 = CentOS6;CentOS7
 #CentOS5、RedHat5 = syslog.conf
 #CentOS6、CentOS7、RedHat6 = rsyslog.conf
-class CheckCentOS(object):
+class CheckLinux(object):
     
     def __init__(self):
+        
         self.PCList = []
-        self.__test = "hello"
-        self.respath = "/usr/ProjectTest/res.txt"
+        self.LogList = []
+       
         self.__respos = [(14 ,8), #0
                           (15 ,8),
                           (16, 8),
@@ -72,6 +105,8 @@ class CheckCentOS(object):
                           (32, 10),
                           (33, 10)
                         ]
+        
+        self.logpath, self.respath, self.xlpath = ComCreateResultFilePath()
         
         self.__auditlogitems = {'*.info;mail.none;authpriv.none;cron.none':'/var/log/messages',
                'authpriv.*':'/var/log/secure',
@@ -134,25 +169,68 @@ class CheckCentOS(object):
         print("This is CentOS-Check!")
     def calltestfunc(self):
         self.testfunc()
-    
-
             
 ##############################################################      CheckAuditLog       ########################################################################################          
-    #Pass CentOS5_i386、CentOS6、CentOS7        
+    #Pass CentOS5_i386、CentOS6、CentOS7   
+    
+    def CL_Syslog_Conf(self, cmdline = "/etc/syslog.conf"):
+        '''
+        All function name begin with "CL" which means "Check Linux"
+        '''
+        
+        logcontent = "\nSyslog Configuration:\n"
+        xlcontent = ""
+        bfragile = False
+        
+        ver = ComGetPyVersion()
+        if ver != 5:
+            cmdline = "/etc/rsyslog.conf"
+        
+        with open(cmdline, 'r') as fsyslog:
+            for line in fsyslog:
+                if len(line.rstrip().lstrip()) == 0:
+                    continue
+                if line.rstrip()[0] == '#':
+                    continue
+                for item in self.__auditlogitems.keys():
+                    if item in line:
+                        logcontent += line
+                        try:
+                            itemkey = line.split()[0]
+                            itemvalue = line.split()[1]
+                        except IndexError:
+                            continue       
+                        if(self.__auditlogitems[itemkey] == itemvalue):
+                            pass
+                        else:
+                            bfragile = True
+                            xlcontent += line
+                        break    
+                    
+        print(logcontent)
+        print(xlcontent)
+        
+            
+    
     def CheckAuditLog(self):
+        
+        logcontent = "\nApache account\n"
+        xlcontent = ""
+        bfragile = False        
+        
         rescontent = ""
         bres = False
         #print("start CheckAuditLog...")
         AuditLogCmd = ""
-        content = []
+        
         count = 0
         finish = []   
         log = ""
-        ver = CheckCommonFunc.GetLinuxVer()
-        if int(ver) == 5:
-            AuditLogCmd = self.AllCommands[3]#"cat \/etc\/syslog.conf"
-        else:#if ver != 5
-            AuditLogCmd = self.AllCommands[0]#"cat \/etc\/rsyslog.conf"
+        #ver = CheckCommonFunc.GetLinuxVer()
+        #if int(ver) == 5:
+            #AuditLogCmd = self.AllCommands[3]#"cat \/etc\/syslog.conf"
+        #else:#if ver != 5
+            #AuditLogCmd = self.AllCommands[0]#"cat \/etc\/rsyslog.conf"
         
         
         p1 = subprocess.Popen(AuditLogCmd, shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)#self.AllCommands[0]
@@ -1227,5 +1305,6 @@ def Run():
     
 if __name__ == "__main__":
     print("start...")
-    CheckCentOSRun()
+    c = CheckLinux()
+    c.CL_Syslog_Conf()
     
