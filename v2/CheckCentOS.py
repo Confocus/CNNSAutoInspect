@@ -37,8 +37,7 @@ import time
 import sys
 import copy
 
-import CheckCommonFunc
-from GenExcel import PCTuple, OperExcel
+from GenExcel import *
 from commonfunc import *
 #from XXX import XXX as XXX
 '''Page1'''
@@ -62,7 +61,7 @@ class CheckLinux(object):
         self.PCList = []
         self.LogList = []
        
-        self.__respos = [(14 ,8), #0
+        self.__xlpos = [(14 ,8), #0
                           (15 ,8),
                           (16, 8),
                           (17, 8),
@@ -84,7 +83,7 @@ class CheckLinux(object):
                           (33, 8)#19
                           ]
         
-        self.__expos = [(14 ,10), 
+        self.__fgpos = [(14 ,10), 
                           (15 ,10),
                           (16, 10),
                           (17, 10),
@@ -206,101 +205,131 @@ class CheckLinux(object):
                             bfragile = True
                             xlcontent += line
                         break    
-                    
-        print(logcontent)
-        print(xlcontent)
+        self.LogList.append(logcontent)
         
-            
+        return xlcontent, bfragile
     
-    def CheckAuditLog(self):
+    def CL_LogRecord(self, cmdline = "last /var/log/wtmp"):
         
-        logcontent = "\nApache account\n"
+        logcontent = "\nLog Record:\n"
         xlcontent = ""
         bfragile = False        
         
-        rescontent = ""
-        bres = False
-        #print("start CheckAuditLog...")
-        AuditLogCmd = ""
+        result = os.popen(cmdline)  
+        log = ComCompatibleStr(result.read())         
+        #print(log)
+        if len(log.rstrip().lstrip()) == 0:
+            bfragile = True
+        else:
+            logcontent += log
+            xlcontent = log
+        self.LogList.append(logcontent)
         
-        count = 0
-        finish = []   
-        log = ""
-        #ver = CheckCommonFunc.GetLinuxVer()
-        #if int(ver) == 5:
-            #AuditLogCmd = self.AllCommands[3]#"cat \/etc\/syslog.conf"
-        #else:#if ver != 5
-            #AuditLogCmd = self.AllCommands[0]#"cat \/etc\/rsyslog.conf"
+        return xlcontent, bfragile
+            
+    
+    def CL_Audit_Log(self):
+        
+        xlcontent, bfragile = self.CL_Syslog_Conf()
+        xlcontent2, bfragile2 = self.CL_LogRecord()
+        
+        xlcontent += xlcontent2
+        bfragile = bfragile or bfragile2
+        
+        #self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self.__xlpos[0], xlcontent, self.__fgpos[0], bfragile)
+        self.PCList.append(retlist[0])
+        self.PCList.append(retlist[1])  
+        
+        print(retlist[0][2])
+        print(retlist[1][2])
+        #logcontent = "\nApache account\n"
+        #xlcontent = ""
+        #bfragile = False        
+        
+        #rescontent = ""
+        #bres = False
+        ##print("start CheckAuditLog...")
+        #AuditLogCmd = ""
+        
+        #count = 0
+        #finish = []   
+        #log = ""
+        ##ver = CheckCommonFunc.GetLinuxVer()
+        ##if int(ver) == 5:
+            ##AuditLogCmd = self.AllCommands[3]#"cat \/etc\/syslog.conf"
+        ##else:#if ver != 5
+            ##AuditLogCmd = self.AllCommands[0]#"cat \/etc\/rsyslog.conf"
         
         
-        p1 = subprocess.Popen(AuditLogCmd, shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)#self.AllCommands[0]
-        retval = p1.wait()  
-        #if int(ver) == 5:
-            #content = copy.deepcopy(p1.stdout.readlines())
-        #else:
-            #for line in p1.stdout.readlines():
-                #line = str(line, encoding = "utf-8")
-                #content.append(line.rstrip())
-        content = CheckCommonFunc.CompatibleList(p1.stdout.readlines())
+        #p1 = subprocess.Popen(AuditLogCmd, shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)#self.AllCommands[0]
+        #retval = p1.wait()  
+        ##if int(ver) == 5:
+            ##content = copy.deepcopy(p1.stdout.readlines())
+        ##else:
+            ##for line in p1.stdout.readlines():
+                ##line = str(line, encoding = "utf-8")
+                ##content.append(line.rstrip())
+        #content = CheckCommonFunc.CompatibleList(p1.stdout.readlines())
        
-        f = open(self.respath, "a+")
-        f.write("*************************Log Audit*************************\n")
-        for line in content:
-            #line = str(line, encoding = "utf-8")
-            if(count == len(self.__auditlogitems)):
-                break
-            for item in self.__auditlogitems.keys():
-                if item in line:
-                    finish.append(item)
-                    try:
-                        itemkey = line.split()[0]
-                        itemvalue = line.split()[1]
-                    except IndexError:
-                        continue
-                    rescontent = rescontent + item + ":" + itemvalue + '\n'
-                    if(self.__auditlogitems[itemkey] == itemvalue):
-                        count += 1
-                        #print("%s:pass.The value is %s"%(itemkey, itemvalue))
-                        f.write(itemkey + ":pass.The value is " + itemvalue + "\n")
-                    else:
-                        #print("%s:miss"%(itemkey))
-                        bres = True
-                        f.write(itemkey + ":miss\n")
-                    break
+        #f = open(self.respath, "a+")
+        #f.write("*************************Log Audit*************************\n")
+        #for line in content:
+            ##line = str(line, encoding = "utf-8")
+            #if(count == len(self.__auditlogitems)):
+                #break
+            #for item in self.__auditlogitems.keys():
+                #if item in line:
+                    #finish.append(item)
+                    #try:
+                        #itemkey = line.split()[0]
+                        #itemvalue = line.split()[1]
+                    #except IndexError:
+                        #continue
+                    #rescontent = rescontent + item + ":" + itemvalue + '\n'
+                    #if(self.__auditlogitems[itemkey] == itemvalue):
+                        #count += 1
+                        ##print("%s:pass.The value is %s"%(itemkey, itemvalue))
+                        #f.write(itemkey + ":pass.The value is " + itemvalue + "\n")
+                    #else:
+                        ##print("%s:miss"%(itemkey))
+                        #bres = True
+                        #f.write(itemkey + ":miss\n")
+                    #break
         
                     
-        if(len(finish) == len(self.__auditlogitems)):
-            f.write("All auditlog items were checked.\n")
-        else:######################################################Warn######################################################
-            #print("Uncheck:")
-            #print(list(set(__auditlogitems.keys()).difference(set(finish)))) 
-            f.write("Uncheck:" + ' '.join(list(set(self.__auditlogitems.keys()).difference(set(finish)))) + "\n")
+        #if(len(finish) == len(self.__auditlogitems)):
+            #f.write("All auditlog items were checked.\n")
+        #else:######################################################Warn######################################################
+            ##print("Uncheck:")
+            ##print(list(set(__auditlogitems.keys()).difference(set(finish)))) 
+            #f.write("Uncheck:" + ' '.join(list(set(self.__auditlogitems.keys()).difference(set(finish)))) + "\n")
         
-        p2 = subprocess.Popen(self.AllCommands[1], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p2.wait()  
-        #if int(ver) == 5:
-            #log = ''.join(p2.stdout.readlines()).rstrip().lstrip()
-            ##print(log)
-        #else:
-            #log = str(p2.stdout.read().lstrip().rstrip(), encoding = "utf-8")
-        log = CheckCommonFunc.CompatibleStr(''.join(p2.stdout.readlines()).rstrip().lstrip())
-        #print(log)
-        rescontent = rescontent + "/var/log/wtmp:" + log
-        if log.strip() != "":
-            #print("Log:%s"%(log))
-            f.write("Log:" + log + "\n")
-        else:######################################################Warn######################################################
-            #print("Log:miss")
-            bres = True
-            f.write("Warn:There is no log record\n")
-        f.close()
+        #p2 = subprocess.Popen(self.AllCommands[1], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        #retval = p2.wait()  
+        ##if int(ver) == 5:
+            ##log = ''.join(p2.stdout.readlines()).rstrip().lstrip()
+            ###print(log)
+        ##else:
+            ##log = str(p2.stdout.read().lstrip().rstrip(), encoding = "utf-8")
+        #log = CheckCommonFunc.CompatibleStr(''.join(p2.stdout.readlines()).rstrip().lstrip())
+        ##print(log)
+        #rescontent = rescontent + "/var/log/wtmp:" + log
+        #if log.strip() != "":
+            ##print("Log:%s"%(log))
+            #f.write("Log:" + log + "\n")
+        #else:######################################################Warn######################################################
+            ##print("Log:miss")
+            #bres = True
+            #f.write("Warn:There is no log record\n")
+        #f.close()
         
         
-        pct1 = PCTuple(self.__respos[0][0], self.__respos[0][1], rescontent)
-        pct2 = PCTuple(self.__expos[0][0], self.__expos[0][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)
-        #print(rescontent)
+        #pct1 = PCTuple(self.__respos[0][0], self.__respos[0][1], rescontent)
+        #pct2 = PCTuple(self.__expos[0][0], self.__expos[0][1], "exist" if bres == True else "unexist")
+        #self.PCList.append(pct1)
+        #self.PCList.append(pct2)
+        ##print(rescontent)
     
     
 ##############################################################      CheckLogAuth       ########################################################################################          
@@ -1306,5 +1335,5 @@ def Run():
 if __name__ == "__main__":
     print("start...")
     c = CheckLinux()
-    c.CL_Syslog_Conf()
+    c.CL_Audit_Log()
     
