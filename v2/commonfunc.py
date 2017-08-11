@@ -10,6 +10,14 @@ class CommonCentOSException(Exception):
     pass      
     
     
+def cmd_ls_l(self, cmdline):
+    
+    cmdline = "ls -l " + cmdline
+    result = os.popen(cmdline)  
+    auth = ComCompatibleStr(result.readline()) 
+    
+    return auth
+    
 def ComOutputLog():
     pass
 def ComOutputExcel():

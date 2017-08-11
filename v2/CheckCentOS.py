@@ -72,7 +72,7 @@ class CheckLinux(object):
                           (22, 8),#8 
                           (23, 8),
                           (24, 8),
-                          (25, 8),
+                          (25, 8),#11
                           (26, 8),
                           (27, 8),#13
                           (28, 8),
@@ -540,50 +540,54 @@ class CheckLinux(object):
         self.PCList.append(retlist[0])    
         self.PCList.append(retlist[1])
         
+        #print(logcontent)
+        #print(retlist[0][2])
+        #print(retlist[1][2])
+
+    #def CL_ls_l(self, cmdline):
+        
+        #cmdline = "ls -l " + cmdline
+        #result = os.popen(cmdline)  
+        #auth = ComCompatibleStr(result.readline())  
+        
+        #return auth
+        
+    def CL_VitalFile_Auth(self):
+        '''
+        Parse passwd、shadow and group three file together
+        '''
+        
+        logcontent = "\nVital file authority:\n"
+        xlcontent = ""
+        bfragile = False        
+        
+        ret = cmd_ls_l("/etc/passwd")
+        logcontent += ret
+        xlcontent = "passwd:" + ret.split()[0]
+        if ret.split()[0] != "-rw-r--r--" or ret.split()[0] != "-rw-r--r--.":
+            bfragile = True
+        
+        ret = cmd_ls_l("/etc/shadow")
+        logcontent += ret
+        xlcontent += "shadow:" + ret.split()[0]
+        if ret.split()[0] != "-r--------" or ret.split()[0] != "-r--------.":
+            bfragile = True        
+        
+        ret = cmd_ls_l("/etc/group")
+        logcontent += ret
+        xlcontent += "group:" + ret.split()[0]
+        if ret.split()[0] != "-rw-r--r--" or ret.split()[0] != "-rw-r--r--.":
+            bfragile = True        
+        
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self.__xlpos[11], xlcontent, self.__fgpos[11], bfragile)
+        self.PCList.append(retlist[0])    
+        self.PCList.append(retlist[1])        
+        
         print(logcontent)
         print(retlist[0][2])
         print(retlist[1][2])
-        #rescontent = ""
-        #bres = False        
-        #content = []
-        #MaxDays = 0
-        #p = subprocess.Popen(self.AllCommands[8], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        #retval = p.wait()
-        #f = open(self.respath, "a+")
-        #f.write("*************************Password Maxdays*************************\n")
-        #ver = self.GetLinuxVer()
-        #if int(ver) == 5:
-            #content = copy.deepcopy(p.stdout.readlines())
-        #else:
-            #for line in p.stdout.readlines():
-                #line = str(line, encoding = "utf-8")
-                #content.append(line.rstrip())     
-        #content = CheckCommonFunc.CompatibleList(p.stdout.readlines())
-        #for line in content:
-            #if "PASS_MAX_DAYS" in line:
-                ##print(line)
-                #log = line.lstrip().rstrip()
-                #if log[0] == '#':
-                    #continue
-                #else:
-                    #MaxDays = int(log.split()[1])
-                    #break
-        #if MaxDays == 0:
-            #bres = True
-            #rescontent = "Default\n"
-            #f.write("PASS_MAX_DAYS:Default\n")
-        #else:
-            #rescontent = str(MaxDays) + "\n"
-            #f.write("PASS_MAX_DAYS:" + str(MaxDays) + "\n")
-        #f.close()
         
-        #pct1 = PCTuple(self.__respos[8][0], self.__respos[8][1], rescontent)
-        #pct2 = PCTuple(self.__expos[8][0], self.__expos[8][1], "exist" if bres == True else "unexist")
-        #self.PCList.append(pct1)
-        #self.PCList.append(pct2)         
-        #print(rescontent)
-            
-##############################################################      AuthenFailedTimes       ########################################################################################
     #Pass CentOS5_i386、CentOS6、CentOS7
     def AuthenFailedTimes(self):
         rescontent = ""
@@ -1241,5 +1245,5 @@ def Run():
 if __name__ == "__main__":
     print("start...")
     c = CheckLinux()
-    c.CL_Pass_Maxdays()
+    c.CL_VitalFile_Auth()
     
