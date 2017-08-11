@@ -132,10 +132,11 @@ class CheckCentOSApache():
         #result = os.popen(cmdline)  #考虑到文件可能较大，不使用管道
         #res = result.read() 
         
-        with open(httpdpath, 'r') as hf:
+        with open(httpdpath, 'r') as hf:    
             '''
             key items:
             "Directory", "ServerLimit", "MaxClient", "<LimitExcept", "ErrorDocument", "/usr/local/apache2/cgi-bin"
+            这里直接cat到内存，是否性能还能提升？
             '''
     
             for line in hf:

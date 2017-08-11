@@ -175,6 +175,7 @@ class CheckLinux(object):
     def CL_Syslog_Conf(self, cmdline = "/etc/syslog.conf"):
         '''
         All function name begin with "CL" which means "Check Linux"
+        这里直接cat到内存，是否性能还能提升？
         '''
         
         logcontent = "\nSyslog Configuration:\n"
@@ -289,37 +290,64 @@ class CheckLinux(object):
         #print(retlist[1][2])
         
         
-    def CheckNetLogServConf(self):
-        rescontent = ""
-        bres = False        
-        content = []
-        bstatus = False
-        argcmd = ""
-        f = open(self.respath, "a+")
-        f.write("*************************Net Log Server*************************\n")   
-            
-        ver = CheckCommonFunc.GetLinuxVer()
-        if int(ver) == 5:
-            argcmd = self.AllCommands[3]        
-        else:
-            argcmd = self.AllCommands[0] 
-        p = subprocess.Popen(self.AllCommands[0], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p.wait()             
+    def CL_NetLogServer_Conf(self, cmdline = "cat /etc/syslog.conf"):
         
-        content = CheckCommonFunc.CompatibleList(p.stdout.readlines())
+        logcontent = "\nNetLog Server:\n"
+        xlcontent = ""
+        bfragile = False
+        
+        ver = ComGetLinuxVer()
+        if ver != 5:
+            cmdline = "cat /etc/rsyslog.conf"
+        
+        result = os.popen(cmdline)  
+        content = ComCompatibleList(result.readlines())           
+        
         for line in content:
             if "*.* @" in line and line.lstrip()[0] != '#':
-                #print(line)
-                rescontent = rescontent + line.rstrip()+ '\n'
-                f.write(line.rstrip() + '\n')
-                bstatus = True
-        if bstatus == False:
-            rescontent = "Default setting" + '\n'
-            f.write("Default setting" + '\n')            
-        f.close()
+                logcontent += line + '\n'
+                xlcontent += line + '\n'
         
-        pct1 = PCTuple(self.__respos[3][0], self.__respos[3][1], rescontent)
-        self.PCList.append(pct1)
+        if len(xlcontent.rstrip().lstrip()) == 0:
+            xlcontent = "unset."
+        
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self.__xlpos[3], xlcontent, self.__fgpos[3], bfragile)
+        self.PCList.append(retlist[0])
+        
+        print(retlist[0][2])
+        
+        #self.PCList.append(retlist[1])         
+        #rescontent = ""
+        #bres = False        
+        #content = []
+        #bstatus = False
+        #argcmd = ""
+        #f = open(self.respath, "a+")
+        #f.write("*************************Net Log Server*************************\n")   
+            
+        ##ver = CheckCommonFunc.GetLinuxVer()
+        ##if int(ver) == 5:
+            ##argcmd = self.AllCommands[3]        
+        ##else:
+            ##argcmd = self.AllCommands[0] 
+        ##p = subprocess.Popen(self.AllCommands[0], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        ##retval = p.wait()             
+        
+        ##content = CheckCommonFunc.CompatibleList(p.stdout.readlines())
+        #for line in content:
+            #if "*.* @" in line and line.lstrip()[0] != '#':
+                ##print(line)
+                #rescontent = rescontent + line.rstrip()+ '\n'
+                #f.write(line.rstrip() + '\n')
+                #bstatus = True
+        #if bstatus == False:
+            #rescontent = "Default setting" + '\n'
+            #f.write("Default setting" + '\n')            
+        #f.close()
+        
+        #pct1 = PCTuple(self.__respos[3][0], self.__respos[3][1], rescontent)
+        #self.PCList.append(pct1)
         #print(rescontent)
         
         
@@ -349,7 +377,7 @@ class CheckLinux(object):
         
         return xlcontent
     
-    def CL_PasswdUser_Caller(self):
+    def CL_PasswdUser_Caller(self): #item 5
         '''
         Consider that PasswdUser maybe called with another function, I define this caller function 
         to parse the return of CL_PasswdUser.
@@ -383,15 +411,10 @@ class CheckLinux(object):
         xlcontent += '\n'    
         
         self.LogList.append(logcontent)
-        #retlist = ConstructPCTuple(self.__xlpos[5], xlcontent, self.__fgpos[5], bfragile)
-        #self.PCList.append(retlist[0])
-    
-        #print(logcontent)
-        #print(retlist[0][2])
     
         return xlcontent    
     
-    def CL_PasswdShadowUser_Caller(self):
+    def CL_PasswdShadowUser_Caller(self):   #item 6
         
         bfragile = False
         
@@ -401,7 +424,7 @@ class CheckLinux(object):
         retlist = ConstructPCTuple(self.__xlpos[5], xlcontent, self.__fgpos[5], bfragile)
         self.PCList.append(retlist[0])        
         
-        print(retlist[0][2])
+        #print(retlist[0][2])
         
         
 ##############################################################      CheckUselessAccount       ########################################################################################          
@@ -1287,5 +1310,5 @@ def Run():
 if __name__ == "__main__":
     print("start...")
     c = CheckLinux()
-    c.CL_PasswdShadowUser_Caller()
+    c.CL_NetLogServer_Conf()
     
