@@ -592,7 +592,7 @@ class CheckLinux(object):
         for line in content:
             if len(line.rstrip().lstrip()) == 0:
                 continue
-            if line.rstrip()[0] == '#':
+            if line.lstrip()[0] == '#':
                 continue
             if "password" in line and "requisite" in line and "pam_unix.so" in line:
                 logcontent += line + '\n'
@@ -726,23 +726,23 @@ class CheckLinux(object):
         
         
         
-    def CheckUnnessesaryServ(self):
-        rescontent = ""
-        bres = False        
-        content = []
-        ver = CheckCommonFunc.GetLinuxVer()
+    def CL_Unnecessesary_Serv(self, cmdline = "chkconfig --list"):
+        logcontent = "\nUnnecessary Service:\n"
+        xlcontent = ""
+        bfragile = False
+        count = 0
         
-        if ver == 6 or ver == 5:
-            count = 0
-            p = subprocess.Popen(self.AllCommands[24], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            retval = p.wait()              
-            f = open(self.respath, "a+")
-            f.write("*************************Unnessesary Server*************************\n")    
-            content = CheckCommonFunc.CompatibleList(p.stdout.readlines())
+        ver = ComGetLinuxVer()
+        
+        if ver == 7:
+            cmdline = "systemctl list-unit-files"
+            result = os.popen(cmdline)  
+            content = ComCompatibleList(result.readlines()) 
             for line in content:
-                #line = str(line, encoding = "utf-8")
-                if count == len(self.__unnessserv):
+                if len(line.lstrip().rstrip()) == 0:
                     break
+                if count == len(self.__unnessserv):
+                    break 
                 for serv in self.__unnessserv:
                     try:
                         line.split()[0]
@@ -752,34 +752,23 @@ class CheckLinux(object):
                     else:
                         if serv == line.split()[0]:
                             #print(serv)
-                            rescontent = rescontent + line.rstrip() + '\n'
+                            logcontent += line + '\n'
                             count += 1
-                            status = False
-                            for i in range(1, 8):
-                                #print(line.split()[i])
-                                if line.split()[i].split(':')[1] == "on":
-                                    status = True
-                                    break
-                            if status == True:
-                                bres = True
-                                f.write("Warn:" + serv + "\n")
-                            break
-            f.close()
-                
-        if ver == 7:
-            count = 0
-            p = subprocess.Popen(self.AllCommands[21], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            retval = p.wait()  
-            f = open(self.respath, "a+")
-            f.write("*************************Unnessesary Server*************************\n")
-            content = CheckCommonFunc.CompatibleList(p.stdout.readlines())
-            #print(len(content))
+                            if line.split()[1] == "enabled":
+                                xlcontent += line + '\n'
+                                bfragile = True
+                            break              
+        else:
+            result = os.popen(cmdline)  
+            content = ComCompatibleList(result.readlines())    
+            
             for line in content:
-                #print(line)
-                #line = str(line, encoding = "utf-8")  
-                if count == len(self.__unnessserv):
+                if len(line.lstrip().rstrip()) == 0:
                     break
+                if count == len(self.__unnessserv):
+                    break 
                 for serv in self.__unnessserv:
+                    
                     try:
                         line.split()[0]
                         line.split()[1]            
@@ -787,68 +776,54 @@ class CheckLinux(object):
                         continue
                     else:
                         if serv == line.split()[0]:
-                            #print("line")
-                            rescontent = rescontent + line.rstrip() + '\n'
+                            print(serv)
+                            logcontent += line.rstrip() + '\n'
                             count += 1
-                            if line.split()[1] == "enabled":
-                                bres = True
-                                f.write("Warn:" + serv + "\n")
-                            #print(line) 
-                            break                            
-            f.close()
-            
-        pct1 = PCTuple(self.__respos[17][0], self.__respos[17][1], rescontent)
-        pct2 = PCTuple(self.__expos[17][0], self.__expos[17][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)       
-        #print(rescontent)
-                
-    def CheckNPTServ(self):
-        rescontent = ""
-        bres = False        
-        status = False
-        content = []
-        serverlist = []
-        log = ""
-        p = subprocess.Popen(self.AllCommands[22], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p.wait()      
-        f = open(self.respath, "a+")
-        f.write("*************************NPT Server*************************\n")
-        #ver = self.GetLinuxVer()
-        #if int(ver) == 5:
-            #content = copy.deepcopy(p.stdout.readlines())
-        #else:
-            #for line in p.stdout.readlines():
-                #line = str(line, encoding = "utf-8")
-                #content.append(line.rstrip())    
-        content = CheckCommonFunc.CompatibleList(p.stdout.readlines())        
-        for line in content:
-            try:
-                line.split()[0]
-            except IndexError:
-                continue
-            else:
-                if line.split()[0] == "server":
-                    log = line
-                    rescontent = rescontent + log.rstrip() + '\n'
-                    f.write(log + '\n')
-                    status = True
+                            for i in range(1, 8):
+                                if line.split()[i].split(':')[1] == "on":
+                                    xlcontent += line + '\n'
+                                    bfragile = True
+                                    break
+                            break               
                     
-        #if status == True:
-            #f.write(log + '\n')
-        #else:
-            #f.write("Warn:NPT.\n")
-        if status == False:
-            bres = True
-            f.write("Warn:NPT.\n")
-        f.close()
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self.__xlpos[17], xlcontent, self.__fgpos[17], bfragile)
+        self.PCList.append(retlist[0])    
+        self.PCList.append(retlist[1])  
         
-        pct1 = PCTuple(self.__respos[18][0], self.__respos[18][1], rescontent)
-        pct2 = PCTuple(self.__expos[18][0], self.__expos[18][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)         
-        #print(rescontent)
             
+        
+                
+    def CL_NPT_Serv(self, cmdline = "cat /etc/ntp.conf"):
+        logcontent = "\nNTP Service:\n"
+        xlcontent = ""
+        bfragile = False
+        
+        result = os.popen(cmdline)  
+        content = ComCompatibleList(result.readlines()) 
+        
+        for line in content:
+            if len(line.rstrip().lstrip()) == 0:
+                continue
+            if line.lstrip()[0] == '#':
+                continue
+            if line.split()[0] == "server":
+                logcontent += line + '\n'
+                xlcontent += line + '\n'
+                
+        if xlcontent == "":
+            bfragile = True
+            
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self.__xlpos[18], xlcontent, self.__fgpos[18], bfragile)
+        self.PCList.append(retlist[0])    
+        self.PCList.append(retlist[1])    
+        
+        print(logcontent)
+        print(retlist[0][2])
+        print(retlist[1][2])            
+        
+        
     def CheckDNSIP(self):
         content = []
         rescontent = ""
@@ -1032,5 +1007,5 @@ def Run():
 if __name__ == "__main__":
     print("start...")
     c = CheckLinux()
-    c.CL_IP_Rangement()
+    c.CL_NPT_Serv()
     
