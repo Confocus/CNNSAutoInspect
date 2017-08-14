@@ -237,6 +237,8 @@ class CheckLinux(object):
         xlcontent += xlcontent2
         bfragile = bfragile or bfragile2
         
+        if xlcontent == "":
+            xlcontent = "unset"
         #self.LogList.append(logcontent)
         retlist = ConstructPCTuple(self.__xlpos[0], xlcontent, self.__fgpos[0], bfragile)
         self.PCList.append(retlist[0])
@@ -280,6 +282,8 @@ class CheckLinux(object):
         if(len(finish) < len(self.__logauthitems)):
             bfragile = True
         
+        if xlcontent == "":
+            xlcontent = "unset"        
         self.LogList.append(logcontent)
         retlist = ConstructPCTuple(self.__xlpos[1], xlcontent, self.__fgpos[1], bfragile)
         self.PCList.append(retlist[0])
@@ -352,6 +356,10 @@ class CheckLinux(object):
         bfragile = False
         
         xlcontent = self.CL_PasswdUser()
+        
+        if len(xlcontent.rstrip().lstrip()) == 0:
+            xlcontent = "unset."       
+            
         retlist = ConstructPCTuple(self.__xlpos[4], xlcontent, self.__fgpos[4], bfragile)
         self.PCList.append(retlist[0])        
         
@@ -388,6 +396,9 @@ class CheckLinux(object):
         xlcontent = self.CL_PasswdUser()
         xlcontent += self.CL_ShadowUser()
         
+        if len(xlcontent.rstrip().lstrip()) == 0:
+            xlcontent = "unset."        
+        
         retlist = ConstructPCTuple(self.__xlpos[5], xlcontent, self.__fgpos[5], bfragile)
         self.PCList.append(retlist[0])        
         
@@ -413,7 +424,9 @@ class CheckLinux(object):
                     bfragile = True
                 break
         
-        
+        if len(xlcontent.rstrip().lstrip()) == 0:
+            xlcontent = "unset."     
+            
         self.LogList.append(logcontent)
         retlist = ConstructPCTuple(self.__xlpos[6], xlcontent, self.__fgpos[6], bfragile)
         self.PCList.append(retlist[0])    
@@ -456,7 +469,8 @@ class CheckLinux(object):
                     bfragile = True
                 continue
         
-        if xlcontent == "":
+        if len(xlcontent.rstrip().lstrip()) == 0:
+            xlcontent = "unset."
             bfragile = True       
             
         self.LogList.append(logcontent)
@@ -490,7 +504,8 @@ class CheckLinux(object):
                     bfragile = True
                 break
             
-        if xlcontent == "":
+        if len(xlcontent.rstrip().lstrip()) == 0:
+            xlcontent = "unset."
             bfragile = True      
             
         self.LogList.append(logcontent)
@@ -509,31 +524,31 @@ class CheckLinux(object):
         bfragile = False        
         
         ret = cmd_ls_l("/etc/passwd")
-        logcontent += ret
+        logcontent += ret + '\n'
         xlcontent = "passwd:" + ret.split()[0]
         if ret.split()[0] != "-rw-r--r--" or ret.split()[0] != "-rw-r--r--.":
             bfragile = True
         
         ret = cmd_ls_l("/etc/shadow")
-        logcontent += ret
+        logcontent += ret + '\n'
         xlcontent += "shadow:" + ret.split()[0]
         if ret.split()[0] != "-r--------" or ret.split()[0] != "-r--------.":
             bfragile = True        
         
         ret = cmd_ls_l("/etc/group")
-        logcontent += ret
+        logcontent += ret + '\n'
         xlcontent += "group:" + ret.split()[0]
         if ret.split()[0] != "-rw-r--r--" or ret.split()[0] != "-rw-r--r--.":
             bfragile = True        
         
+        if len(xlcontent.rstrip().lstrip()) == 0:
+            xlcontent = "unset."     
+            
         self.LogList.append(logcontent)
         retlist = ConstructPCTuple(self.__xlpos[11], xlcontent, self.__fgpos[11], bfragile)
         self.PCList.append(retlist[0])    
         self.PCList.append(retlist[1])        
         
-        #print(logcontent)
-        #print(retlist[0][2])
-        #print(retlist[1][2])
         
     #Pass CentOS5_i386、CentOS6、CentOS7
     def CL_Authen_FailedTimes(self, cmdline = "cat /etc/pam.d/login"):
@@ -558,7 +573,8 @@ class CheckLinux(object):
                 else:
                     bfragile = True
         
-        if xlcontent == "":
+        if len(xlcontent.rstrip().lstrip()) == 0:
+            xlcontent = "unset."
             bfragile = True
             
         self.LogList.append(logcontent)
@@ -593,7 +609,8 @@ class CheckLinux(object):
                         else:
                             bfragile = True
                             
-        if xlcontent == "":
+        if len(xlcontent.rstrip().lstrip()) == 0:
+            xlcontent = "unset."
             bfragile = True
             
         self.LogList.append(logcontent)
@@ -620,7 +637,8 @@ class CheckLinux(object):
         if umask != "0027":
             bfragile = True
             
-        if xlcontent == "":
+        if len(xlcontent.rstrip().lstrip()) == 0:
+            xlcontent = "unset."
             bfragile = True
             
         self.LogList.append(logcontent)
@@ -656,6 +674,9 @@ class CheckLinux(object):
         xlcontent +='\n' + xlcontent1
         bfragile = bfragile or bfragile1
         
+        if len(xlcontent.rstrip().lstrip()) == 0:
+            xlcontent = "unset."
+            
         retlist = ConstructPCTuple(self.__xlpos[13], xlcontent, self.__fgpos[13], bfragile)
         self.PCList.append(retlist[0])    
         self.PCList.append(retlist[1])      
@@ -684,6 +705,9 @@ class CheckLinux(object):
             logcontent += line + '\n'
             xlcontent += line + '\n'
             
+        if len(xlcontent.rstrip().lstrip()) == 0:
+            xlcontent = "unset."    
+            
         self.LogList.append(logcontent)
         retlist = ConstructPCTuple(self.__xlpos[15], xlcontent, self.__fgpos[15], bfragile)
         self.PCList.append(retlist[0])    
@@ -708,6 +732,9 @@ class CheckLinux(object):
         logcontent += timeout + '\n'
         xlcontent += timeout
         
+        if len(xlcontent.rstrip().lstrip()) == 0:
+            xlcontent = "unset."
+            
         self.LogList.append(logcontent)
         retlist = ConstructPCTuple(self.__xlpos[16], xlcontent, self.__fgpos[16], bfragile)
         self.PCList.append(retlist[0])    
@@ -765,7 +792,7 @@ class CheckLinux(object):
                         continue
                     else:
                         if serv == line.split()[0]:
-                            print(serv)
+                            #print(serv)
                             logcontent += line.rstrip() + '\n'
                             count += 1
                             for i in range(1, 8):
@@ -774,7 +801,10 @@ class CheckLinux(object):
                                     bfragile = True
                                     break
                             break               
-                    
+        
+        if len(xlcontent.rstrip().lstrip()) == 0:
+            xlcontent = "unset."        
+        
         self.LogList.append(logcontent)
         retlist = ConstructPCTuple(self.__xlpos[17], xlcontent, self.__fgpos[17], bfragile)
         self.PCList.append(retlist[0])    
@@ -800,7 +830,8 @@ class CheckLinux(object):
                 logcontent += line + '\n'
                 xlcontent += line + '\n'
                 
-        if xlcontent == "":
+        if len(xlcontent.rstrip().lstrip()) == 0:
+            xlcontent = "unset."
             bfragile = True
             
         self.LogList.append(logcontent)
@@ -830,7 +861,8 @@ class CheckLinux(object):
             logcontent += line + '\n'
             xlcontent += line +'\n'
             
-        if xlcontent == "":
+        if len(xlcontent.rstrip().lstrip()) == 0:
+            xlcontent = "unset."
             bfragile = True
             
         self.LogList.append(logcontent)
@@ -842,10 +874,14 @@ class CheckLinux(object):
         #print(retlist[0][2])
         #print(retlist[1][2])        
         
+    def CL_GenTxtLog(self):
+        with open(self.respath, 'w') as ftxt:
+            for line in self.LogList:
+                ftxt.write(line)        
                 
-def CheckCentOSRun():
-    c = CheckCentOS()
-    assert CheckCommonFunc.GetLinuxVer() != 0
+def CheckLinuxRun():
+    c = CheckLinux()
+    assert ComGetLinuxVer() != 0
     
     #if os.path.exists(CheckCentOS.respath) == True:
         #os.remove(CheckCentOS.respath)
@@ -990,149 +1026,21 @@ def CheckCentOSRun():
         except Exception as e:
             flog.write("CheckDNSService exception:" + repr(e) + "\n")
         else:
-            flog.write("CheckDNSService finished.\n")            
+            flog.write("CheckDNSService finished.\n")   
             
-    #try:    
-        #c.CheckAuditLog()
-    #except:
-        #flog.write("CheckAuditLog exception.\n")
-    #else:
-        #flog.write("CheckAuditLog finished.\n")
-        
-    #try:    
-        #c.CheckLogAuth()
-    #except:
-        #flog.write("CheckLogAuth exception.\n")
-    #else:
-        #flog.write("CheckLogAuth finished.\n")
-    
-    #try:
-        #c.CheckNetLogServConf()
-    #except:
-        #flog.write("CheckNetLogServConf exception.\n")
-    #else:
-        #flog.write("CheckNetLogServConf finished.\n")
-        
-    #try:
-        #c.CheckAccountAuth()
-    #except:
-        #flog.write("CheckAccountAuth exception.\n")
-    #else:
-        #flog.write("CheckAccountAuth finished.\n")    
-        
-    #try:    
-        #c.CheckUselessAccount()
-    #except:
-        #flog.write("CheckUselessAccount exception.\n")
-    #else:
-        #flog.write("CheckUselessAccount finished.\n")   
-        
-    #try:    
-        #c.CheckPermitRootLogin()
-    #except:
-        #flog.write("CheckPermitRootLogin exception.\n")
-    #else:
-        #flog.write("CheckPermitRootLogin finished.\n")
-        
-    #try:
-        #c.CheckPasswdComplexity()
-    #except:
-        #flog.write("CheckPasswdComplexity exception.\n")
-    #else:
-        #flog.write("CheckPasswdComplexity finished.\n")
-        
-    #try:
-        #c.PasswordTimeLimit()
-    #except:
-        #flog.write("PasswordTimeLimit exception.\n")
-    #else:
-        #flog.write("PasswordTimeLimit finished.\n")
-        
-    #try:
-        #c.AuthenFailedTimes()
-    #except:
-        #flog.write("AuthenFailedTimes exception.\n")
-    #else:
-        #flog.write("AuthenFailedTimes finished.\n")
-        
-    #try:
-        #c.PasswdHistoryTimes()
-    #except:
-        #flog.write("PasswdHistoryTimes exception.\n")
-    #else:
-        #flog.write("PasswdHistoryTimes finished.\n")
-        
-    #try:
-        #c.CheckVitalDirAuth()
-    #except:
-        #flog.write("CheckVitalDirAuth exception.\n")
-    #else:
-        #flog.write("CheckVitalDirAuth finished.\n")
-        
-    #try:
-        #c.CheckUmask()
-    #except:
-        #flog.write("CheckUmask exception.\n")
-    #else:
-        #flog.write("CheckUmask finished.\n")
-        
-    #try:
-        #c.CheckRemoteLogin()
-    #except:
-        #flog.write("CheckRemoteLogin exception.\n")
-    #else:
-        #flog.write("CheckRemoteLogin finished.\n")
-        
-    #try:
-        #c.CheckIPRangement()
-    #except:
-        #flog.write("CheckIPRangement exception.\n")
-    #else:
-        #flog.write("CheckIPRangement finished.\n")
+        try:
+            FillContent(c.xlpath, c.PCList)
+        except Exception as e:
+            flog.write("Operate Excel exception:" + repr(e) + "\n")
+        else:
+            flog.write("Operate Excel finished.\n")             
             
-    #try:
-        #c.CheckTimeout()
-    #except:
-        #flog.write("CheckTimeout exception.\n")
-    #else:
-        #flog.write("CheckTimeout finished.\n")
-        
-    #try:
-        #c.CheckUnnessesaryServ()
-    #except:
-        #flog.write("CheckUnnessesaryServ exception.\n")
-    #else:
-        #flog.write("CheckUnnessesaryServ finished.\n")
-        
-    #try:
-        #c.CheckNPTServ()
-    #except:
-        #flog.write("CheckNPTServ exception.\n")
-    #else:
-        #flog.write("CheckNPTServ finished.\n")
-        
-    #try:
-        #c.CheckDNSIP()
-    #except:
-        #flog.write("CheckDNSIP exception.\n")
-    #else:
-        #flog.write("CheckDNSIP finished.\n")    
-    
-    #try:
-        #oe = OperExcel()
-        #oe.FillContent("/home/wang/Desktop/centos2.xlsx", c.PCList)    
-    #except:
-        #flog.write("Operate Excel exception.\n")
-    #else:
-        #flog.write("Operate Excel finished.\n")
-        
-    #flog.close()
+    c.CL_GenTxtLog()
     
 def Run():
     print("CentOS running.")
     
 if __name__ == "__main__":
-    print("start...")
-    c = CheckLinux()
-    c.CL_DNS_IP()
+    print("LinuxCheck start...")
+    CheckLinuxRun()
     

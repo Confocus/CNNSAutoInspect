@@ -574,7 +574,7 @@ class CheckCentOSApache():
         self.PCList.append(retlist[1])
         #print(len(self.PCList))
     
-    def GenTxtLog(self):
+    def CA_GenTxtLog(self):
         with open(self.respath, 'w') as ftxt:
             for line in self.LogList:
                 ftxt.write(line)
@@ -690,9 +690,9 @@ def CheckApacheRun():
         else:
             flog.write("Operate Excel finished.\n")            
             
-    c.GenTxtLog()
+    c.CA_GenTxtLog()
     
 if __name__ == "__main__":
-    print("start...")
+    print("ApacheCheck start...")
     CheckApacheRun()
     
