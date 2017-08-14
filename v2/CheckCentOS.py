@@ -421,7 +421,50 @@ class CheckLinux(object):
         
                         
     #Pass CentOS5_i386、CentOS6、CentOS7                
-    def CheckPasswdComplexity(self):
+    def CL_Passwd_Complexity(self, cmdline = "cat /etc/pam.d/system-auth"):
+        logcontent = "\nPassword complexity:\n"
+        xlcontent = ""
+        bfragile = False
+        
+        result = os.popen(cmdline)  
+        content = ComCompatibleList(result.readlines())         
+        
+        for line in content:
+            if len(line.lstrip().rstrip()) == 0:
+                continue
+            if line.lstrip()[0] == '#':
+                continue
+            if "password" in line and "requisite" in line and "pam_passwdqc.so" in line:
+                logcontent += line + '\n'
+                xlcontent += line + '\n'
+                if "enforce=everyone" not in line:
+                    bfragile = True
+                continue
+            if "password" in line and "requisite" in line and "pam_cracklib.so" in line:
+                logcontent += line + '\n'
+                xlcontent += line + '\n'
+                if "minlen=8" in line and "lcredit=-1" in line and "ucredit=-1" in line and \
+                   "ocredit=-1" in line and "dcredit=-1" in line:
+                    pass
+                else:
+                    bfragile = True
+                continue
+            if "password" in line and "include" in line and "pam_stack.so" in line:
+                logcontent += line + '\n'
+                xlcontent += line + '\n'
+                if "system-auth" not in line:
+                    bfragile = True
+                continue
+            
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self.__xlpos[7], xlcontent, self.__fgpos[7], bfragile)
+        self.PCList.append(retlist[0])    
+        self.PCList.append(retlist[1]) 
+        
+        print(logcontent)
+        print(retlist[0][2])
+        print(retlist[1][2])
+            
         #print("CheckPasswdComplexity start...")
         rescontent = ""
         bres = False        
@@ -442,18 +485,18 @@ class CheckLinux(object):
                 #content.append(line.rstrip())
         content = CheckCommonFunc.CompatibleList(p1.stdout.readlines())
         try:  
-            for line in content:
-                if "password" in line and  \
-                "requisite" in line and \
-                "pam_passwdqc.so" in line and\
-                line.lstrip()[0] != '#': 
-                    rescontent = rescontent + line.rstrip() + '\n'
-                    if "enforce=everyone" in line:
-                        state1 = True
-                    else:
-                        state1 = False
-            if state1 == False:
-                f.write("Warn1:There are problem in password-complexity setting.\n")
+            #for line in content:
+                #if "password" in line and  \
+                #"requisite" in line and \
+                #"pam_passwdqc.so" in line and\
+                #line.lstrip()[0] != '#': 
+                    #rescontent = rescontent + line.rstrip() + '\n'
+                    #if "enforce=everyone" in line:
+                        #state1 = True
+                    #else:
+                        #state1 = False
+            #if state1 == False:
+                #f.write("Warn1:There are problem in password-complexity setting.\n")
                 #rescontent = "No Setting.\n"
                 bres = True
                 #return False
@@ -504,6 +547,7 @@ class CheckLinux(object):
             f.close()
             if rescontent == "":
                 rescontent == "No Setting."
+                
             pct1 = PCTuple(self.__respos[7][0], self.__respos[7][1], rescontent)
             pct2 = PCTuple(self.__expos[7][0], self.__expos[7][1], "exist" if bres == True else "unexist")
             self.PCList.append(pct1)
