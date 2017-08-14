@@ -700,49 +700,31 @@ class CheckLinux(object):
         self.PCList.append(retlist[0])    
         self.PCList.append(retlist[1]) 
         
-        print(logcontent)
-        print(retlist[0][2])
-        print(retlist[1][2])           
+        #print(logcontent)
+        #print(retlist[0][2])
+        #print(retlist[1][2])           
         
              
     #Pass CentOS5_i386、CentOS6、CentOS7   
-    def CheckTimeout(self):
-        rescontent = ""
-        bres = False        
-        timeout = ""
-        p = subprocess.Popen(self.AllCommands[20], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p.wait()   
+    def CL_Timeout(self, cmdline = "echo $TIMEOUT"):
+        logcontent = "\nDeny and allow IP rangement:\n"
+        xlcontent = ""
+        bfragile = False 
         
-        f = open(self.respath, "a+")
-        f.write("*************************Timeout*************************\n")
-        #ver = self.GetLinuxVer()
-        #if int(ver) == 5:
-            #timeout = p.stdout.read().rstrip().lstrip()
-            ##print(timeout)
-        #else:
-            #timeout = str(p.stdout.read().rstrip().lstrip(), encoding = "utf-8")      
-            ##print(timeout)
-        timeout = CheckCommonFunc.CompatibleStr(p.stdout.read().rstrip().lstrip())   
-        rescontent = timeout + '\n'
-        try:
-            int(timeout)
-        except ValueError:#有的时候echo TIMEOUT会返回空值
-            bres = True
-            rescontent = "Default Setting.\n"
-            f.write("NO TIMEOUT.\n")
-        else:     
-            if int(timeout.rstrip()) == 300:
-                f.write("TIMEOUT correct.\n")
-            else:
-                bres = True
-                f.write("Warn:TIMEOUT ERROR.\n")
-        f.close()
-    
-        pct1 = PCTuple(self.__respos[16][0], self.__respos[16][1], rescontent)
-        pct2 = PCTuple(self.__expos[16][0], self.__expos[16][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)      
-        #print(rescontent)
+        result = os.popen(cmdline)  
+        timeout = ComCompatibleStr(result.readline())
+        if timeout != "300":
+            bfragile = True
+        
+        logcontent += timeout + '\n'
+        xlcontent += timeout
+        
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self.__xlpos[16], xlcontent, self.__fgpos[16], bfragile)
+        self.PCList.append(retlist[0])    
+        self.PCList.append(retlist[1]) 
+        
+        
         
     def CheckUnnessesaryServ(self):
         rescontent = ""
