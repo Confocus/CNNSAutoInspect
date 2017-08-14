@@ -498,17 +498,6 @@ class CheckLinux(object):
         self.PCList.append(retlist[0])    
         self.PCList.append(retlist[1])
         
-        #print(logcontent)
-        #print(retlist[0][2])
-        #print(retlist[1][2])
-
-    #def CL_ls_l(self, cmdline):
-        
-        #cmdline = "ls -l " + cmdline
-        #result = os.popen(cmdline)  
-        #auth = ComCompatibleStr(result.readline())  
-        
-        #return auth
         
     def CL_VitalFile_Auth(self):
         '''
@@ -542,9 +531,9 @@ class CheckLinux(object):
         self.PCList.append(retlist[0])    
         self.PCList.append(retlist[1])        
         
-        print(logcontent)
-        print(retlist[0][2])
-        print(retlist[1][2])
+        #print(logcontent)
+        #print(retlist[0][2])
+        #print(retlist[1][2])
         
     #Pass CentOS5_i386、CentOS6、CentOS7
     def CL_Authen_FailedTimes(self, cmdline = "cat /etc/pam.d/login"):
@@ -819,30 +808,40 @@ class CheckLinux(object):
         self.PCList.append(retlist[0])    
         self.PCList.append(retlist[1])    
         
-        print(logcontent)
-        print(retlist[0][2])
-        print(retlist[1][2])            
+        #print(logcontent)
+        #print(retlist[0][2])
+        #print(retlist[1][2])            
         
         
-    def CheckDNSIP(self):
-        content = []
-        rescontent = ""
-        bres = False
-        p = subprocess.Popen(self.AllCommands[23], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p.wait()          
-        content = CheckCommonFunc.CompatibleList(p.stdout.readlines())    
+    def CL_DNS_IP(self, cmdline = "cat /etc/resolv.conf"):
+        
+        logcontent = "\nDNS resolv conf:\n"
+        xlcontent = ""
+        bfragile = False     
+        
+        result = os.popen(cmdline)  
+        content = ComCompatibleList(result.readlines()) 
+        
         for line in content:
-            try:
-                if line.lstrip()[0] == '#':
-                    continue
-            except IndexError:
+            if len(line.rstrip().lstrip()) == 0:
                 continue
-            else:
-                rescontent = rescontent + line.rstrip() + '\n'   
+            if line.lstrip()[0] == '#':
+                continue
+            logcontent += line + '\n'
+            xlcontent += line +'\n'
+            
+        if xlcontent == "":
+            bfragile = True
+            
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self.__xlpos[19], xlcontent, self.__fgpos[19], bfragile)
+        self.PCList.append(retlist[0])    
+        self.PCList.append(retlist[1])           
         
-        pct1 = PCTuple(self.__respos[19][0], self.__respos[19][1], rescontent)
-        self.PCList.append(pct1)    
-        #print(rescontent)
+        #print(logcontent)
+        #print(retlist[0][2])
+        #print(retlist[1][2])        
+        
                 
 def CheckCentOSRun():
     c = CheckCentOS()
@@ -852,19 +851,147 @@ def CheckCentOSRun():
         #os.remove(CheckCentOS.respath)
     if os.path.exists(c.respath) == True:
         os.remove(c.respath)    
-    logtime = str(time.time()).replace('.', '')
-    logpath = "/usr/ProjectTest/log_" + logtime + ".txt"
+    #logtime = str(time.time()).replace('.', '')
+    #logpath = "/usr/ProjectTest/log_" + logtime + ".txt"
     
-    if os.path.exists("/usr/ProjectTest") == False:
-        os.mkdir("/usr/ProjectTest")    
-    if os.path.exists(logpath) == True:
-        os.remove(logpath)
+    #if os.path.exists("/usr/ProjectTest") == False:
+        #os.mkdir("/usr/ProjectTest")    
+    #if os.path.exists(logpath) == True:
+        #os.remove(logpath)
         
-    flog = open(logpath, "w")
+    #flog = open(logpath, "w")
    
     
-    print("CentOS version:" + str(CheckCommonFunc.GetLinuxVer()))
+    #print("CentOS version:" + str(CheckCommonFunc.GetLinuxVer()))
     #c.CheckVitalDirAuth()
+    with open(c.logpath, 'w') as flog:
+        
+        try:    
+            c.CL_Audit_Log()
+        except Exception as e:
+            flog.write("CheckAuditLog exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckAuditLog finished.\n") 
+            
+        try:    
+            c.CL_Logfile_Auth()
+        except Exception as e:
+            flog.write("CheckLogFileAuth exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckLogFileAuth finished.\n")             
+            
+        try:    
+            c.CL_NetLogServer_Conf()
+        except Exception as e:
+            flog.write("CheckNetLogServer exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckNetLogServer finished.\n")             
+            
+        try:    
+            c.CL_PasswdUser_Caller()
+        except Exception as e:
+            flog.write("CheckPasswdUser exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckPasswdUser finished.\n") 
+            
+        try:    
+            c.CL_PasswdShadowUser_Caller()
+        except Exception as e:
+            flog.write("CheckPasswdShadowUser exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckPasswdShadowUser finished.\n")             
+            
+        try:    
+            c.CL_PermitRoot_Login()
+        except Exception as e:
+            flog.write("CheckPermitRoot exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckPermitRoot finished.\n")         
+            
+        try:    
+            c.CL_Passwd_Complexity()
+        except Exception as e:
+            flog.write("CheckPasswdComplexity exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckPasswdComplexity finished.\n")  
+            
+        try:    
+            c.CL_Pass_Maxdays()
+        except Exception as e:
+            flog.write("CheckPasswdMaxdays exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckPasswdMaxdays finished.\n")        
+            
+        try:    
+            c.CL_Authen_FailedTimes()
+        except Exception as e:
+            flog.write("CheckAuthenFailedTimes exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckAuthenFailedTimes finished.\n")    
+            
+        try:    
+            c.CL_Passwd_HistroyTimes()
+        except Exception as e:
+            flog.write("CheckPasswdHistoryTimes exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckPasswdHistoryTimes finished.\n") 
+            
+        try:    
+            c.CL_VitalFile_Auth()
+        except Exception as e:
+            flog.write("CheckVitalFileAuth exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckVitalFileAuth finished.\n") 
+            
+        try:    
+            c.CL_Umask()
+        except Exception as e:
+            flog.write("CheckUmask exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckUmask finished.\n") 
+            
+        try:    
+            c.CL_RemoteLogin_Serv()
+        except Exception as e:
+            flog.write("CheckRemoteLoginService exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckRemoteLoginService finished.\n")             
+            
+        try:    
+            c.CL_IP_Rangement()
+        except Exception as e:
+            flog.write("CheckIPRangement exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckIPRangement finished.\n") 
+            
+        try:    
+            c.CL_Timeout()
+        except Exception as e:
+            flog.write("CheckTimeout exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckTimeout finished.\n")
+            
+        try:    
+            c.CL_Unnecessesary_Serv()
+        except Exception as e:
+            flog.write("CheckUnnecessaryService exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckUnnecessaryService finished.\n")  
+            
+        try:    
+            c.CL_NPT_Serv()
+        except Exception as e:
+            flog.write("CheckNPTService exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckNPTService finished.\n") 
+            
+        try:    
+            c.CL_DNS_IP()
+        except Exception as e:
+            flog.write("CheckDNSService exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckDNSService finished.\n")            
+            
     try:    
         c.CheckAuditLog()
     except:
@@ -1007,5 +1134,5 @@ def Run():
 if __name__ == "__main__":
     print("start...")
     c = CheckLinux()
-    c.CL_NPT_Serv()
+    c.CL_DNS_IP()
     
