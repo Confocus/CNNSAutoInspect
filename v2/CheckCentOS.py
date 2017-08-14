@@ -455,107 +455,19 @@ class CheckLinux(object):
                 if "system-auth" not in line:
                     bfragile = True
                 continue
+        
+        if xlcontent == "":
+            bfragile = True       
             
         self.LogList.append(logcontent)
         retlist = ConstructPCTuple(self.__xlpos[7], xlcontent, self.__fgpos[7], bfragile)
         self.PCList.append(retlist[0])    
         self.PCList.append(retlist[1]) 
         
-        print(logcontent)
-        print(retlist[0][2])
-        print(retlist[1][2])
-            
-        #print("CheckPasswdComplexity start...")
-        rescontent = ""
-        bres = False        
-        #pam_passwdqc.so
-        content = []
-        log = ""
-        state1 = False
-        p1 = subprocess.Popen(self.AllCommands[7], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p1.wait()         
-        f = open(self.respath, "a+")
-        f.write("*************************Password Complexity Configuration*************************\n") 
-        #ver = self.GetLinuxVer()
-        #if int(ver) == 5:
-            #content = copy.deepcopy(p.stdout.readlines())
-        #else:
-            #for line in p.stdout.readlines():
-                #line = str(line, encoding = "utf-8")
-                #content.append(line.rstrip())
-        content = CheckCommonFunc.CompatibleList(p1.stdout.readlines())
-        try:  
-            #for line in content:
-                #if "password" in line and  \
-                #"requisite" in line and \
-                #"pam_passwdqc.so" in line and\
-                #line.lstrip()[0] != '#': 
-                    #rescontent = rescontent + line.rstrip() + '\n'
-                    #if "enforce=everyone" in line:
-                        #state1 = True
-                    #else:
-                        #state1 = False
-            #if state1 == False:
-                #f.write("Warn1:There are problem in password-complexity setting.\n")
-                #rescontent = "No Setting.\n"
-                bres = True
-                #return False
-                #raise CentOSException()
-        
-            for line in content:
-                if "pam_cracklib.so" in line and \
-                   "password" in line and \
-                   "requisite" in line and \
-                   line.lstrip()[0] != '#':
-                    rescontent = rescontent + line.rstrip() + '\n'
-                    if "minlen=8" in line and "lcredit=-1" in line and \
-                       "ucredit=-1" in line and "ocredit=-1" in line and \
-                       "dcredit=-1" in line:
-                        state1 = True
-                    else:   
-                        state1 = False
-                    break
-            
-            if state1 == False:
-                bres = True
-                #rescontent = "No Setting.\n"
-                f.write("Warn2:There are problem in password-complexity setting.\n")
-                #f.close()
-                #return False        
-            else:
-                f.write("Password-complexity setting correct.\n") 
-                
-            for line in content:
-                if "password" in line and "include" in line and \
-                   "pam_stack.so" in line and line.lstrip()[0] != '#':
-                    rescontent = rescontent + line.rstrip() + '\n'
-                    if "system-auth" in line:
-                        state1 = True
-                    else:
-                        state1 = False
-            if state1 == False:
-                bres = True
-                #rescontent = "No Setting.\n"
-                f.write("Warn3:There are problem in password-complexity setting.\n")
-                #f.close()
-                #return False        
-            else:
-                f.write("Password-complexity setting correct.\n")             
-        except:
-            pass
-        finally:
-            f.close()
-            if rescontent == "":
-                rescontent == "No Setting."
-                
-            pct1 = PCTuple(self.__respos[7][0], self.__respos[7][1], rescontent)
-            pct2 = PCTuple(self.__expos[7][0], self.__expos[7][1], "exist" if bres == True else "unexist")
-            self.PCList.append(pct1)
-            self.PCList.append(pct2)         
-            #print(rescontent)
-        
-        
-##############################################################      CheckPasswdComplexity       ########################################################################################          
+        #print(logcontent)
+        #print(retlist[0][2])
+        #print(retlist[1][2])
+                      
     #Pass CentOS5_i386、CentOS6、CentOS7
     def CL_Pass_Maxdays(self, cmdline = "cat /etc/login.defs"):
         
@@ -578,6 +490,8 @@ class CheckLinux(object):
                     bfragile = True
                 break
             
+        if xlcontent == "":
+            bfragile = True      
             
         self.LogList.append(logcontent)
         retlist = ConstructPCTuple(self.__xlpos[8], xlcontent, self.__fgpos[8], bfragile)
@@ -633,68 +547,48 @@ class CheckLinux(object):
         print(retlist[1][2])
         
     #Pass CentOS5_i386、CentOS6、CentOS7
-    def AuthenFailedTimes(self):
-        rescontent = ""
-        bres = False        
-        content = []
-        log = ""
-        status = False
-        p = subprocess.Popen(self.AllCommands[9], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p.wait() 
-        f = open(self.respath, "a+")
-        f.write("*************************Authenorith Configuration*************************\n")
-        #ver = self.GetLinuxVer()
-        #if int(ver) == 5:
-            #content = copy.deepcopy(p.stdout.readlines())
-        #else:
-            #for line in p.stdout.readlines():
-                #line = str(line, encoding = "utf-8")
-                #content.append(line.rstrip())         
-        content = CheckCommonFunc.CompatibleList(p.stdout.readlines())        
+    def CL_Authen_FailedTimes(self, cmdline = "cat /etc/pam.d/login"):
+        logcontent = "\nAuthen failed times:\n"
+        xlcontent = ""
+        bfragile = False
+    
+        result = os.popen(cmdline)  
+        content = ComCompatibleList(result.readlines())   
+        
         for line in content:
-            if "auth" in line and \
-               "required" in line and \
-               "pam_tally2.so" in line and \
-               line.lstrip()[0] != '#':
-                log = line
-                rescontent = rescontent + log.rstrip() + '\n'
-                if  "deny=6" in line and \
-                    "lock_time=1800" in line and \
-                    "even_deny_root" in line and \
-                    "root_unlock_time=1800" in line:
-                    status = True
-                    log = line
+            if len(line.lstrip().rstrip()) == 0:
+                continue
+            if line.lstrip()[0] == '#':
+                continue
+            if "auth" in line and "required" in line and "pam_tally2.so" in line:
+                logcontent += line + '\n'
+                xlcontent += line + '\n'           
+                if  "deny=6" in line and "lock_time=1800" in line and "even_deny_root" in line and \
+                    "root_unlock_time=1800" in line:    
+                    pass
                 else:
-                    status = False
-                break
+                    bfragile = True
         
-        if status == True:
-            f.write(log + "\n")
-        else:
-            bres = True
-            rescontent = "No Setting.\n"
-            f.write("Warn:There are something wrong about authentication failed times.\n")
-        f.close()
-        if rescontent == "":
-            rescontent = "No Setting."
-        pct1 = PCTuple(self.__respos[9][0], self.__respos[9][1], rescontent)
-        pct2 = PCTuple(self.__expos[9][0], self.__expos[9][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)      
-        #print(rescontent)
+        if xlcontent == "":
+            bfragile = True
             
-##############################################################      PasswdHistoryTimes       ########################################################################################
-    #Pass CentOS5_i386、CentOS6、CentOS7
-    def PasswdHistoryTimes(self):
-        rescontent = ""
-        bres = False        
-        content = []
-        log = ""
-        status = False
-        p = subprocess.Popen(self.AllCommands[10], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p.wait()             
-        f = open(self.respath, "a+")
-        f.write("*************************Effective Times*************************\n")
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self.__xlpos[9], xlcontent, self.__fgpos[9], bfragile)
+        self.PCList.append(retlist[0])    
+        self.PCList.append(retlist[1])   
+        
+        print(logcontent)
+        print(retlist[0][2])
+        print(retlist[1][2])        
+        #rescontent = ""
+        #bres = False        
+        #content = []
+        #log = ""
+        #status = False
+        #p = subprocess.Popen(self.AllCommands[9], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        #retval = p.wait() 
+        #f = open(self.respath, "a+")
+        #f.write("*************************Authenorith Configuration*************************\n")
         #ver = self.GetLinuxVer()
         #if int(ver) == 5:
             #content = copy.deepcopy(p.stdout.readlines())
@@ -702,30 +596,82 @@ class CheckLinux(object):
             #for line in p.stdout.readlines():
                 #line = str(line, encoding = "utf-8")
                 #content.append(line.rstrip())         
-        content = CheckCommonFunc.CompatibleList(p.stdout.readlines())  
+        #content = CheckCommonFunc.CompatibleList(p.stdout.readlines())        
+        #for line in content:
+            #if "auth" in line and \
+               #"required" in line and \
+               #"pam_tally2.so" in line and \
+               #line.lstrip()[0] != '#':
+                #log = line
+                #rescontent = rescontent + log.rstrip() + '\n'
+                #if  "deny=6" in line and \
+                    #"lock_time=1800" in line and \
+                    #"even_deny_root" in line and \
+                    #"root_unlock_time=1800" in line:
+                    #status = True
+                    #log = line
+                #else:
+                    #status = False
+                #break
         
-        for line in content:
-            if "password" in line and \
-               "requisite" in line and \
-               "pam_unix.so" in line and \
-               line.lstrip()[0] != '#':
-                log = line
-                status = True
-                rescontent = rescontent + line.rstrip() + '\n'
-                break
-        if status == True:
-            f.write(log + "\n")
-        else:
-            bres = True
-            rescontent = "No Setting.\n"
-            f.write("Warn:There are something wrong about password-historical-times.\n")
-        f.close()
+        #if status == True:
+            #f.write(log + "\n")
+        #else:
+            #bres = True
+            #rescontent = "No Setting.\n"
+            #f.write("Warn:There are something wrong about authentication failed times.\n")
+        #f.close()
+        #if rescontent == "":
+            #rescontent = "No Setting."
+        #pct1 = PCTuple(self.__respos[9][0], self.__respos[9][1], rescontent)
+        #pct2 = PCTuple(self.__expos[9][0], self.__expos[9][1], "exist" if bres == True else "unexist")
+        #self.PCList.append(pct1)
+        #self.PCList.append(pct2)      
+        ##print(rescontent)
+            
+###############################################################      PasswdHistoryTimes       ########################################################################################
+    ##Pass CentOS5_i386、CentOS6、CentOS7
+    #def PasswdHistoryTimes(self):
+        #rescontent = ""
+        #bres = False        
+        #content = []
+        #log = ""
+        #status = False
+        #p = subprocess.Popen(self.AllCommands[10], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        #retval = p.wait()             
+        #f = open(self.respath, "a+")
+        #f.write("*************************Effective Times*************************\n")
+        ##ver = self.GetLinuxVer()
+        ##if int(ver) == 5:
+            ##content = copy.deepcopy(p.stdout.readlines())
+        ##else:
+            ##for line in p.stdout.readlines():
+                ##line = str(line, encoding = "utf-8")
+                ##content.append(line.rstrip())         
+        #content = CheckCommonFunc.CompatibleList(p.stdout.readlines())  
         
-        pct1 = PCTuple(self.__respos[10][0], self.__respos[10][1], rescontent)
-        pct2 = PCTuple(self.__expos[10][0], self.__expos[10][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)     
-        #print(rescontent)
+        #for line in content:
+            #if "password" in line and \
+               #"requisite" in line and \
+               #"pam_unix.so" in line and \
+               #line.lstrip()[0] != '#':
+                #log = line
+                #status = True
+                #rescontent = rescontent + line.rstrip() + '\n'
+                #break
+        #if status == True:
+            #f.write(log + "\n")
+        #else:
+            #bres = True
+            #rescontent = "No Setting.\n"
+            #f.write("Warn:There are something wrong about password-historical-times.\n")
+        #f.close()
+        
+        #pct1 = PCTuple(self.__respos[10][0], self.__respos[10][1], rescontent)
+        #pct2 = PCTuple(self.__expos[10][0], self.__expos[10][1], "exist" if bres == True else "unexist")
+        #self.PCList.append(pct1)
+        #self.PCList.append(pct2)     
+        ##print(rescontent)
             
 ##############################################################      PasswdHistoryTimes       ########################################################################################
     #Pass CentOS5_i386、CentOS6、CentOS7
@@ -1289,5 +1235,5 @@ def Run():
 if __name__ == "__main__":
     print("start...")
     c = CheckLinux()
-    c.CL_VitalFile_Auth()
+    c.CL_Authen_FailedTimes()
     
