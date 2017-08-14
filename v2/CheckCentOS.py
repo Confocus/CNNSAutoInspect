@@ -639,97 +639,47 @@ class CheckLinux(object):
         self.PCList.append(retlist[0])    
         self.PCList.append(retlist[1])             
                         
-        print(logcontent)
-        print(retlist[0][2])
-        print(retlist[1][2])         
-        #rescontent = ""
-        #bres = False        
-        #umask = ""
-        #p = subprocess.Popen(self.AllCommands[14], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        #retval = p.wait()   
-        #f = open(self.respath, "a+")
-        #f.write("*************************Umask*************************\n")
-        #ver = self.GetLinuxVer()
-        #if int(ver) == 5:
-            #umask = p.stdout.read().rstrip().lstrip()
-        #else:
-            #umask = str(p.stdout.read().rstrip().lstrip(), encoding = "utf-8")
-        #umask = CheckCommonFunc.CompatibleStr(p.stdout.read().rstrip().lstrip())
-        #rescontent = rescontent + umask.rstrip() + '\n'
-        #if umask == "0027":
-            #f.write("Umask correct.\n")
-        #else:
-            #bres = True
-            #f.write("Warn:Umask.\n")
-        #f.close()
-        #print(p.stdout.read().lstrip().rstrip())
-
-        #pct1 = PCTuple(self.__respos[12][0], self.__respos[12][1], rescontent)
-        #pct2 = PCTuple(self.__expos[12][0], self.__expos[12][1], "exist" if bres == True else "unexist")
-        #self.PCList.append(pct1)
-        #self.PCList.append(pct2)     
-        #print(rescontent)
-        
-##############################################################      CheckRemoteLogin       ########################################################################################          
+        #print(logcontent)
+        #print(retlist[0][2])
+        #print(retlist[1][2])         
+              
     #Pass CentOS5_i386、CentOS6、CentOS7   
-    def CheckRemoteLogin(self):
-        rescontent = ""
-        bres = False        
-        content = []
-        status1 = False
-        status2 = False
-        p1 = subprocess.Popen(self.AllCommands[15], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p1.wait()   
-        f = open(self.respath, "a+")
-        f.write("*************************Remote Login*************************\n")
-        #ver = self.GetLinuxVer()
-        #if int(ver) == 5:
-            #content = copy.deepcopy(p1.stdout.readlines())
-        #else:
-            #for line in p1.stdout.readlines():
-                #line = str(line, encoding = "utf-8")
-                #content.append(line.rstrip())  
-        content = CheckCommonFunc.CompatibleList(p1.stdout.readlines())        
-        for line in content:
-            if line.split()[len(line.split()) - 1].rstrip() == "telnet" and "grep" not in line:
-                rescontent = rescontent + line.rstrip() + '\n'
-                bres = True
-                status1 = True
-                break
+    def CL_Check_Serv(self, serv = "telnet"):
+        logcontent = "\nTelnet service:\n"
+        xlcontent = ""
+        bfragile = False  
         
-        content = []
-        p2 = subprocess.Popen(self.AllCommands[16], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p2.wait()   
-        #if int(ver) == 5:
-            #content = copy.deepcopy(p2.stdout.readlines())
-        #else:
-            #for line in p2.stdout.readlines():
-                #line = str(line, encoding = "utf-8")
-                #content.append(line.rstrip())  
-        content = CheckCommonFunc.CompatibleList(p2.stdout.readlines())
-                
-        for line in content:
-            if "sshd" in line and "grep" not in line:
-                status2 = True
-                rescontent = rescontent + line.rstrip() + '\n'
-                bres = True
-                break
-        if status1 == False:
-            f.write("Telnet is closed.\n")
-        else:
-            f.write("Warn:Telnet.\n")
-            
-        if status2 == False:
-            f.write("SSH is closed.\n")
-        else:
-            f.write("Warn:SSH.\n")
-        f.close()
+        cmdline = "ps -elf|grep " + serv
         
-        pct1 = PCTuple(self.__respos[13][0], self.__respos[13][1], rescontent)
-        pct2 = PCTuple(self.__expos[13][0], self.__expos[13][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)   
-        #print(rescontent)
+        result = os.popen(cmdline)  
+        content = ComCompatibleList(result.readlines())
+        for line in content:
+            #print(line)
+            if serv in line.split()[-1]  and "grep" not in line:
+                logcontent += line + '\n'
+                xlcontent += line + '\n'
+                bfragile = True
+        
+        self.LogList.append(logcontent)
+        return xlcontent, bfragile
+    
+    def CL_RemoteLogin_Serv(self, cmdline = ""):
+        xlcontent, bfragile = self.CL_Check_Serv()
+        xlcontent1, bfragile1 = self.CL_Check_Serv("ssh")
+        xlcontent +='\n' + xlcontent1
+        bfragile = bfragile or bfragile1
+        
+        retlist = ConstructPCTuple(self.__xlpos[13], xlcontent, self.__fgpos[13], bfragile)
+        self.PCList.append(retlist[0])    
+        self.PCList.append(retlist[1])      
+        
+        #
+        print(retlist[0][2])
+        print(retlist[1][2])          
+
+    
+    def CL_SSH_Serv(self, cmdline = "ps -elf|grep telnet"):
+        pass
     
     def CheckIPRangement(self):
         rescontent = ""
@@ -1109,5 +1059,5 @@ def Run():
 if __name__ == "__main__":
     print("start...")
     c = CheckLinux()
-    c.CL_Umask()
+    c.CL_RemoteLogin_Serv()
     
