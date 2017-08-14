@@ -616,35 +616,58 @@ class CheckLinux(object):
         #print(retlist[0][2])
         #print(retlist[1][2])                        
             
-##############################################################      PasswdHistoryTimes       ########################################################################################
     #Pass CentOS5_i386、CentOS6、CentOS7
-    def CheckUmask(self):
-        rescontent = ""
-        bres = False        
-        umask = ""
-        p = subprocess.Popen(self.AllCommands[14], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p.wait()   
-        f = open(self.respath, "a+")
-        f.write("*************************Umask*************************\n")
+    def CL_Umask(self, cmdline = "umask"):
+        logcontent = "\nUmask:\n"
+        xlcontent = ""
+        bfragile = False  
+        
+        result = os.popen(cmdline)  
+        umask = ComCompatibleStr(result.readline()) 
+        
+        logcontent += umask + '\n'
+        xlcontent += umask
+        
+        if umask != "0027":
+            bfragile = True
+            
+        if xlcontent == "":
+            bfragile = True
+            
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self.__xlpos[12], xlcontent, self.__fgpos[12], bfragile)
+        self.PCList.append(retlist[0])    
+        self.PCList.append(retlist[1])             
+                        
+        print(logcontent)
+        print(retlist[0][2])
+        print(retlist[1][2])         
+        #rescontent = ""
+        #bres = False        
+        #umask = ""
+        #p = subprocess.Popen(self.AllCommands[14], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        #retval = p.wait()   
+        #f = open(self.respath, "a+")
+        #f.write("*************************Umask*************************\n")
         #ver = self.GetLinuxVer()
         #if int(ver) == 5:
             #umask = p.stdout.read().rstrip().lstrip()
         #else:
             #umask = str(p.stdout.read().rstrip().lstrip(), encoding = "utf-8")
-        umask = CheckCommonFunc.CompatibleStr(p.stdout.read().rstrip().lstrip())
-        rescontent = rescontent + umask.rstrip() + '\n'
-        if umask == "0027":
-            f.write("Umask correct.\n")
-        else:
-            bres = True
-            f.write("Warn:Umask.\n")
-        f.close()
+        #umask = CheckCommonFunc.CompatibleStr(p.stdout.read().rstrip().lstrip())
+        #rescontent = rescontent + umask.rstrip() + '\n'
+        #if umask == "0027":
+            #f.write("Umask correct.\n")
+        #else:
+            #bres = True
+            #f.write("Warn:Umask.\n")
+        #f.close()
         #print(p.stdout.read().lstrip().rstrip())
 
-        pct1 = PCTuple(self.__respos[12][0], self.__respos[12][1], rescontent)
-        pct2 = PCTuple(self.__expos[12][0], self.__expos[12][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)     
+        #pct1 = PCTuple(self.__respos[12][0], self.__respos[12][1], rescontent)
+        #pct2 = PCTuple(self.__expos[12][0], self.__expos[12][1], "exist" if bres == True else "unexist")
+        #self.PCList.append(pct1)
+        #self.PCList.append(pct2)     
         #print(rescontent)
         
 ##############################################################      CheckRemoteLogin       ########################################################################################          
@@ -1086,5 +1109,5 @@ def Run():
 if __name__ == "__main__":
     print("start...")
     c = CheckLinux()
-    c.CL_Passwd_HistroyTimes()
+    c.CL_Umask()
     
