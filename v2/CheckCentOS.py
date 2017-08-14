@@ -880,26 +880,21 @@ class CheckLinux(object):
                 ftxt.write(line)        
                 
 def CheckLinuxRun():
-    c = CheckLinux()
+    
+    try:
+        c = CheckLinux()
+    except CommonNoExcelTemplate as e:
+        print("NoExcelTemplate exception:" + repr(e) + "\n")
+    else:
+        print("Load excel template success.\n")
+    finally:
+        sys.exit(0)    
+        
     assert ComGetLinuxVer() != 0
     
-    #if os.path.exists(CheckCentOS.respath) == True:
-        #os.remove(CheckCentOS.respath)
     if os.path.exists(c.respath) == True:
-        os.remove(c.respath)    
-    #logtime = str(time.time()).replace('.', '')
-    #logpath = "/usr/ProjectTest/log_" + logtime + ".txt"
+        os.remove(c.respath)         
     
-    #if os.path.exists("/usr/ProjectTest") == False:
-        #os.mkdir("/usr/ProjectTest")    
-    #if os.path.exists(logpath) == True:
-        #os.remove(logpath)
-        
-    #flog = open(logpath, "w")
-   
-    
-    #print("CentOS version:" + str(CheckCommonFunc.GetLinuxVer()))
-    #c.CheckVitalDirAuth()
     with open(c.logpath, 'w') as flog:
         
         try:    

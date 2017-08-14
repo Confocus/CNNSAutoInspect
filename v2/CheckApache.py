@@ -580,21 +580,19 @@ class CheckCentOSApache():
                 ftxt.write(line)
         
 def CheckApacheRun():
-    c = CheckCentOSApache()
+    try:
+        c = CheckCentOSApache()
+    except CommonNoExcelTemplate as e:
+        print("NoExcelTemplate exception:" + repr(e) + "\n")
+    else:
+        print("Load excel template success.\n")
+    finally:
+        sys.exit(0)   
+        
     assert ComGetLinuxVer() != 0
     
     if os.path.exists(c.respath) == True:
         os.remove(c.respath)    
-    #if os.path.exists(c.xlpath)  == True:
-        #os.remove(c.xlpath)
-        
-    #logtime = str(time.time()).replace('.', '')
-    #logpath = "/usr/ProjectTest/log_" + logtime + ".txt"
-    
-    #if os.path.exists("/usr/ProjectTest") == False:
-        #os.mkdir("/usr/ProjectTest")    
-    #if os.path.exists(logpath) == True:
-        #os.remove(logpath)
     
     with open(c.logpath, 'w') as flog:
         

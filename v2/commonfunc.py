@@ -8,7 +8,8 @@ import socket
 
 class CommonCentOSException(Exception):  
     pass      
-    
+class CommonNoExcelTemplate(Exception):
+    pass
     
 def cmd_ls_l(cmdline):
     
@@ -39,8 +40,15 @@ def ComCreateResultFilePath():
     
     logpath = curpath + "log_" + logtime + ".log"
     respath = curpath + str(hostname) + str(ip) + ".txt"
-    #xlpath = curpath + str(hostname) + str(ip) + ".xlsx"
-    xlpath = curpath + "centos2" + ".xlsx"
+    xlpath = curpath + str(hostname) + str(ip) + ".xlsx"
+    #xlpath = curpath + "centos2" + ".xlsx"
+    
+    tmpxlpath = curpath + "check.xlsx"
+    if os.path.exists(tmpxlpath) == False:
+        print("unexist\n")
+        raise CommonNoExcelTemplate("You need excel template!\n")
+    
+    os.rename(tmpxlpath, xlpath)
     
     return logpath, respath, xlpath
     
