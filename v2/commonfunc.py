@@ -10,13 +10,21 @@ class CommonCentOSException(Exception):
     pass      
     
     
-def cmd_ls_l(self, cmdline):
+def cmd_ls_l(cmdline):
     
     cmdline = "ls -l " + cmdline
     result = os.popen(cmdline)  
     auth = ComCompatibleStr(result.readline()) 
     
     return auth
+
+def cmd_cat(path):
+    cmdline = "cat " + path
+    result = os.popen(cmdline)  
+    content = ComCompatibleList(result.readlines())     
+    
+    return content
+    
     
 def ComOutputLog():
     pass

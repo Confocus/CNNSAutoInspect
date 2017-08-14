@@ -639,9 +639,7 @@ class CheckLinux(object):
         self.PCList.append(retlist[0])    
         self.PCList.append(retlist[1])             
                         
-        #print(logcontent)
-        #print(retlist[0][2])
-        #print(retlist[1][2])         
+             
               
     #Pass CentOS5_i386、CentOS6、CentOS7   
     def CL_Check_Serv(self, serv = "telnet"):
@@ -672,48 +670,41 @@ class CheckLinux(object):
         retlist = ConstructPCTuple(self.__xlpos[13], xlcontent, self.__fgpos[13], bfragile)
         self.PCList.append(retlist[0])    
         self.PCList.append(retlist[1])      
+    
+    
+    def CL_IP_Rangement(self):
+        logcontent = "\nDeny and allow IP rangement:\n"
+        xlcontent = ""
+        bfragile = False 
         
-        #
+        for line in cmd_cat("/etc/hosts.allow"):
+            #print(line)
+            if len(line.lstrip().rstrip()) == 0:
+                continue
+            if line.rstrip()[0] == "#":
+                continue
+            logcontent += line + '\n'
+            xlcontent += line + '\n'
+        
+        for line in cmd_cat("/etc/hosts.allow"):
+            #print(line)
+            if len(line.lstrip().rstrip()) == 0:
+                continue
+            if line.rstrip()[0] == "#":
+                continue
+            logcontent += line + '\n'
+            xlcontent += line + '\n'
+            
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self.__xlpos[15], xlcontent, self.__fgpos[15], bfragile)
+        self.PCList.append(retlist[0])    
+        self.PCList.append(retlist[1]) 
+        
+        print(logcontent)
         print(retlist[0][2])
-        print(retlist[1][2])          
-
-    
-    def CL_SSH_Serv(self, cmdline = "ps -elf|grep telnet"):
-        pass
-    
-    def CheckIPRangement(self):
-        rescontent = ""
-        p = subprocess.Popen(self.AllCommands[17], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p.wait() 
-        content = CheckCommonFunc.CompatibleList(p.stdout.readlines())  
-        for line in content:
-            try:
-                if line.lstrip()[0] == '#':
-                    continue
-            except:
-                continue
-            else:
-                rescontent = rescontent + line.lstrip() + '\n'
+        print(retlist[1][2])           
         
-        content = []
-        p = subprocess.Popen(self.AllCommands[18], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p.wait()        
-        content = CheckCommonFunc.CompatibleList(p.stdout.readlines()) 
-        for line in content:
-            try:
-                if line.lstrip()[0] == '#':
-                    continue
-            except IndexError:
-                continue
-            else:
-                rescontent = rescontent + line.lstrip() + '\n'    
-        if rescontent.rstrip().lstrip() == "":
-            rescontent = "No Setting.\n"
-        pct1 = PCTuple(self.__respos[15][0], self.__respos[15][1], rescontent)
-        self.PCList.append(pct1)
-        #print(rescontent)        
-    
-##############################################################      CheckTimeout       ########################################################################################          
+             
     #Pass CentOS5_i386、CentOS6、CentOS7   
     def CheckTimeout(self):
         rescontent = ""
@@ -1059,5 +1050,5 @@ def Run():
 if __name__ == "__main__":
     print("start...")
     c = CheckLinux()
-    c.CL_RemoteLogin_Serv()
+    c.CL_IP_Rangement()
     
