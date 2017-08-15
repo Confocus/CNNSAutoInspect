@@ -72,22 +72,17 @@ class CheckSolaris(CheckLinux):
         print(retlist[0][2])
         print(retlist[1][2])
         
-       
+    def CS_Unnecessesary_Serv(self, cmdline = "svcs -a"):
+        logcontent = "\nUnnecessary Service:\n"
+        xlcontent = ""
+        bfragile = False
+        count = 0    
         
-        
-    def CheckUnnessesaryServ(self):
-        rescontent = ""
-        bres = False             
-        content = []
-        #count = 0
-        p = subprocess.Popen(self.__morecmd[2], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p.wait()              
-        f = open(self.respath, "a+")
-        f.write("*************************Unnessesary Server*************************\n")    
-        content = CheckCommonFunc.CompatibleList(p.stdout.readlines())
+        result = os.popen(cmdline)  
+        content = ComCompatibleList(result.readlines())          
         
         for line in content:
-            for serv in self._CheckCentOS__unnessserv:
+            for serv in self._CheckLinux__unnessserv:
                 try:
                     line.split()[0]
                     line.split()[2]            
@@ -95,16 +90,22 @@ class CheckSolaris(CheckLinux):
                     continue
                 else:
                     if serv in line.split()[2]:
-                        rescontent = rescontent + line.rstrip() + '\n'
+                        logcontent += line + '\n'
+                        xlcontent += line + '\n'
                         if line.split()[0] != "disabled":
-                            bres = False
-                            f.write("Warn:" + line.split()[2] + "\n")
-                        break
-        f.close()
-        pct1 = PCTuple(self._CheckCentOS__respos[17][0], self._CheckCentOS__respos[17][1], rescontent)
-        pct2 = PCTuple(self._CheckCentOS__expos[17][0], self._CheckCentOS__expos[17][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)    
+                            bfragile = True
+                        break            
+                    
+                    
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self.__xlpos[17], xlcontent, self.__fgpos[17], bfragile)
+        self.PCList.append(retlist[0])    
+        self.PCList.append(retlist[1])     
+    
+        print(logcontent)
+        print(retlist[0][2])
+        print(retlist[1][2])    
+        
     
     def CheckNPTServ(self):
         rescontent = ""
