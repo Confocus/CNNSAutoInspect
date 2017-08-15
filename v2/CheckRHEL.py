@@ -1,197 +1,171 @@
-#coding=utf-8
+##coding=utf-8
 import subprocess
 import os
 import time
 import sys
 import copy
 
-import CheckCentOS
-import CheckCommonFunc
-from GenExcel import PCTuple, OperExcel
+from CheckLinux import *
+from commonfunc import *
+from GenExcel import *
 
-class CheckRHEL(CheckCentOS.CheckCentOS):
-    def testfunc(self):
-        print("This is RHEL-Check!")
-        
-    #def GetLinuxVer(self):
-        #count = 0
-        #cmd = "cat \/etc\/redhat-release"
-        #p = subprocess.Popen(cmd, shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        #retval = p.wait()    
-        
-        #pyVer = self.GetPyVersion()
-        #if pyVer == 2:
-            #verinfo = p.stdout.read().rstrip().lstrip()
-        #else:
-            #verinfo = str(p.stdout.read().rstrip().lstrip(), encoding = "utf-8")
-        #ver = verinfo.split()[len(verinfo.split()) - 2].split('.')[0]
-        #try:   
-            #ver = int(ver)
-        #except ValueError:
-            #ver = 0       
-        #return ver #Redhat5 = CentOS5;RedHat6 = CentOS6
-        
-        
-#if __name__ == "__main__": 
+class CheckRHEL(CheckLinux):
+    pass
+
 def CheckRHELRun():
-    c = CheckRHEL()
     
-    assert CheckCommonFunc.GetLinuxVer() != 0
+    try:
+        c = CheckRHEL()
+    except CommonNoExcelTemplate as e:
+        print("NoExcelTemplate exception:" + repr(e) + "\n")
+        sys.exit(0) 
+    else:
+        print("Load excel template success.\n")
+    
+        
+    assert ComGetLinuxVer() != 0
     
     if os.path.exists(c.respath) == True:
-        os.remove(c.respath)
-    logtime = str(time.time()).replace('.', '')
-    logpath = "/usr/ProjectTest/log_" + logtime + ".txt"
+        os.remove(c.respath)         
     
-    if os.path.exists("/usr/ProjectTest") == False:
-        os.mkdir("/usr/ProjectTest")    
-    if os.path.exists(logpath) == True:
-        os.remove(logpath)
+    with open(c.logpath, 'w') as flog:
         
-    flog = open(logpath, "w")
-   
-    
-    #print("CentOS version:" + str(CheckCommonFunc.GetLinuxVer()))
-    try:    
-        c.CheckAuditLog()
-    except:
-        flog.write("CheckAuditLog exception.\n")
-    else:
-        flog.write("CheckAuditLog finished.\n")
-        
-    try:    
-        c.CheckLogAuth()
-    except:
-        flog.write("CheckLogAuth exception.\n")
-    else:
-        flog.write("CheckLogAuth finished.\n")
-    
-    try:
-        c.CheckNetLogServConf()
-    except:
-        flog.write("CheckNetLogServConf exception.\n")
-    else:
-        flog.write("CheckNetLogServConf finished.\n")
-        
-    try:
-        c.CheckAccountAuth()
-    except:
-        flog.write("CheckAccountAuth exception.\n")
-    else:
-        flog.write("CheckAccountAuth finished.\n")    
-        
-    try:    
-        c.CheckUselessAccount()
-    except:
-        flog.write("CheckUselessAccount exception.\n")
-    else:
-        flog.write("CheckUselessAccount finished.\n")   
-        
-    try:    
-        c.CheckPermitRootLogin()
-    except:
-        flog.write("CheckPermitRootLogin exception.\n")
-    else:
-        flog.write("CheckPermitRootLogin finished.\n")
-        
-    try:
-        c.CheckPasswdComplexity()
-    except:
-        flog.write("CheckPasswdComplexity exception.\n")
-    else:
-        flog.write("CheckPasswdComplexity finished.\n")
-        
-    try:
-        c.PasswordTimeLimit()
-    except:
-        flog.write("PasswordTimeLimit exception.\n")
-    else:
-        flog.write("PasswordTimeLimit finished.\n")
-        
-    try:
-        c.AuthenFailedTimes()
-    except:
-        flog.write("AuthenFailedTimes exception.\n")
-    else:
-        flog.write("AuthenFailedTimes finished.\n")
-        
-    try:
-        c.PasswdHistoryTimes()
-    except:
-        flog.write("PasswdHistoryTimes exception.\n")
-    else:
-        flog.write("PasswdHistoryTimes finished.\n")
-        
-    try:
-        c.CheckVitalDirAuth()
-    except:
-        flog.write("CheckVitalDirAuth exception.\n")
-    else:
-        flog.write("CheckVitalDirAuth finished.\n")
-        
-    try:
-        c.CheckUmask()
-    except:
-        flog.write("CheckUmask exception.\n")
-    else:
-        flog.write("CheckUmask finished.\n")
-        
-    try:
-        c.CheckRemoteLogin()
-    except:
-        flog.write("CheckRemoteLogin exception.\n")
-    else:
-        flog.write("CheckRemoteLogin finished.\n")
-        
-    try:
-        c.CheckIPRangement()
-    except:
-        flog.write("CheckIPRangement exception.\n")
-    else:
-        flog.write("CheckIPRangement finished.\n")
+        try:    
+            c.CL_Audit_Log()
+        except Exception as e:
+            flog.write("CheckAuditLog exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckAuditLog finished.\n") 
             
-    try:
-        c.CheckTimeout()
-    except:
-        flog.write("CheckTimeout exception.\n")
-    else:
-        flog.write("CheckTimeout finished.\n")
-        
-    try:
-        c.CheckUnnessesaryServ()
-    except:
-        flog.write("CheckUnnessesaryServ exception.\n")
-    else:
-        flog.write("CheckUnnessesaryServ finished.\n")
-        
-    try:
-        c.CheckNPTServ()
-    except:
-        flog.write("CheckNPTServ exception.\n")
-    else:
-        flog.write("CheckNPTServ finished.\n")
-        
-    try:
-        c.CheckDNSIP()
-    except:
-        flog.write("CheckDNSIP exception.\n")
-    else:
-        flog.write("CheckDNSIP finished.\n")    
+        try:    
+            c.CL_Logfile_Auth()
+        except Exception as e:
+            flog.write("CheckLogFileAuth exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckLogFileAuth finished.\n")             
+            
+        try:    
+            c.CL_NetLogServer_Conf()
+        except Exception as e:
+            flog.write("CheckNetLogServer exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckNetLogServer finished.\n")             
+            
+        try:    
+            c.CL_PasswdUser_Caller()
+        except Exception as e:
+            flog.write("CheckPasswdUser exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckPasswdUser finished.\n") 
+            
+        try:    
+            c.CL_PasswdShadowUser_Caller()
+        except Exception as e:
+            flog.write("CheckPasswdShadowUser exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckPasswdShadowUser finished.\n")             
+            
+        try:    
+            c.CL_PermitRoot_Login()
+        except Exception as e:
+            flog.write("CheckPermitRoot exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckPermitRoot finished.\n")         
+            
+        try:    
+            c.CL_Passwd_Complexity()
+        except Exception as e:
+            flog.write("CheckPasswdComplexity exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckPasswdComplexity finished.\n")  
+            
+        try:    
+            c.CL_Pass_Maxdays()
+        except Exception as e:
+            flog.write("CheckPasswdMaxdays exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckPasswdMaxdays finished.\n")        
+            
+        try:    
+            c.CL_Authen_FailedTimes()
+        except Exception as e:
+            flog.write("CheckAuthenFailedTimes exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckAuthenFailedTimes finished.\n")    
+            
+        try:    
+            c.CL_Passwd_HistroyTimes()
+        except Exception as e:
+            flog.write("CheckPasswdHistoryTimes exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckPasswdHistoryTimes finished.\n") 
+            
+        try:    
+            c.CL_VitalFile_Auth()
+        except Exception as e:
+            flog.write("CheckVitalFileAuth exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckVitalFileAuth finished.\n") 
+            
+        try:    
+            c.CL_Umask()
+        except Exception as e:
+            flog.write("CheckUmask exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckUmask finished.\n") 
+            
+        try:    
+            c.CL_RemoteLogin_Serv()
+        except Exception as e:
+            flog.write("CheckRemoteLoginService exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckRemoteLoginService finished.\n")             
+            
+        try:    
+            c.CL_IP_Rangement()
+        except Exception as e:
+            flog.write("CheckIPRangement exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckIPRangement finished.\n") 
+            
+        try:    
+            c.CL_Timeout()
+        except Exception as e:
+            flog.write("CheckTimeout exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckTimeout finished.\n")
+            
+        try:    
+            c.CL_Unnecessesary_Serv()
+        except Exception as e:
+            flog.write("CheckUnnecessaryService exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckUnnecessaryService finished.\n")  
+            
+        try:    
+            c.CL_NPT_Serv()
+        except Exception as e:
+            flog.write("CheckNPTService exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckNPTService finished.\n") 
+            
+        try:    
+            c.CL_DNS_IP()
+        except Exception as e:
+            flog.write("CheckDNSService exception:" + repr(e) + "\n")
+        else:
+            flog.write("CheckDNSService finished.\n")   
+            
+        try:
+            FillContent(c.xlpath, c.PCList)
+        except Exception as e:
+            flog.write("Operate Excel exception:" + repr(e) + "\n")
+        else:
+            flog.write("Operate Excel finished.\n")             
+            
+    c.CL_GenTxtLog()
     
-    try:
-        oe = OperExcel()
-        oe.FillContent("/home/wang/Desktop/centos2.xlsx", c.PCList)    
-    except Exception as e:
-        #print(e.message)
-        flog.write("Operate Excel exception.\n")
-    else:
-        flog.write("Operate Excel finished.\n")
-        
-    flog.close()    
-    
-def Run():
-    print("RHEL running.")
-    
+
 if __name__ == "__main__":
-    print("start...")
+    print("RHELCheck start...")
     CheckRHELRun()

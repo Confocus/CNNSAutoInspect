@@ -43,6 +43,9 @@ def ComCreateResultFilePath():
     xlpath = curpath + str(hostname) + str(ip) + ".xlsx"
     #xlpath = curpath + "centos2" + ".xlsx"
     
+    if os.path.exists(xlpath) == True:
+        os.remove(xlpath)
+    
     tmpxlpath = curpath + "check.xlsx"
     if os.path.exists(tmpxlpath) == False:
         print("unexist\n")
