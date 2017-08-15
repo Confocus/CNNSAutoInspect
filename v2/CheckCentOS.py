@@ -18,6 +18,7 @@ def CheckCentOSRun():
     try:
         c = CheckCentOS()
     except CommonNoExcelTemplate as e:
+        #
         print("NoExcelTemplate exception:" + repr(e) + "\n")
         sys.exit(0) 
     else:

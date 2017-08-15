@@ -34,7 +34,13 @@ def ComOutputExcel():
     pass
 
 def ComCreateResultFilePath():
-    curpath = os.path.split(os.path.realpath(__file__))[0] + '/'
+    #print(os.path.realpath(__file__))
+    #print(os.path.dirname(os.path.realpath(__file__)))
+    #print(os.path.split(os.path.realpath(__file__))[0])
+    #print(os.path.abspath(__file__))
+    print(os.getcwd())
+    
+    curpath = os.getcwd() + '/'
     logtime = str(time.time()).replace('.', '')
     hostname = socket.gethostname()
     ip = socket.gethostbyname(hostname)
@@ -48,6 +54,7 @@ def ComCreateResultFilePath():
         os.remove(xlpath)
     
     tmpxlpath = curpath + "check.xlsx"
+    print(tmpxlpath)
     if os.path.exists(tmpxlpath) == False:
         print("unexist\n")
         raise CommonNoExcelTemplate("You need excel template!\n")
@@ -86,7 +93,7 @@ def ComGetLongBit():
     #else:
         ##print("PyVersion is 3\n")
         #lbinfo = str(p.stdout.read().rstrip().lstrip(), encoding = "utf-8")   
-    lbinfo = CompatibleStr(p.stdout.read().rstrip().lstrip())
+    lbinfo = ComCompatibleStr(p.stdout.read().rstrip().lstrip())
     try:
         lbinfo = int(lbinfo)
     except ValueError:
@@ -101,7 +108,7 @@ def ComGetReleaseVer():
     relinfo = ""
     p = subprocess.Popen(cmd, shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     retval = p.wait()           
-    relinfo = CompatibleStr(p.stdout.read().rstrip().lstrip())
+    relinfo = ComCompatibleStr(p.stdout.read().rstrip().lstrip())
     if "CentOS" in relinfo:
         return "CentOS"
     if "Red" in relinfo:
@@ -177,6 +184,6 @@ def ComCompatibleList(l):#Sheild the difference of between py2list and py3list
             content.append(line.rstrip().lstrip())    
     return content
 
-if __name__ == "__main__":
-    print("commonfunc start...")
-    print(ComGetLinuxVer())
+#if __name__ == "__main__":
+    #print("commonfunc start...")
+    #print(ComGetLinuxVer())

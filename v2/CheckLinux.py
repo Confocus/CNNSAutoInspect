@@ -182,7 +182,7 @@ class CheckLinux(object):
         xlcontent = ""
         bfragile = False
         
-        ver = ComGetPyVersion()
+        ver = ComGetLinuxVer()
         if ver == 6 or ver == 7:
             cmdline = "/etc/rsyslog.conf"
         
