@@ -22,219 +22,57 @@ from GenExcel import *
 class CheckSolaris(CheckLinux):
     def __init__(self):
         super(CheckSolaris, self).__init__()
-        self.__morecmd = [
-            "cat /etc/syslog.conf",#0
+        self.__morecmd = [#"cat /etc/syslog.conf",#0
             "cat /etc/default/passwd",
             "svcs -a",
             "cat /etc/inet/ntp.client",
-            "cat /etc/pam.d/passwd"#4
+            "cat /etc/pam.d/passwd"
         ]
         
-    def CheckAuditLog(self):
-        rescontent = ""
-        bres = False        
-        content = []
-        count = 0
-        finish = []   
-        log = ""
+    def CS_Passwd_Complexity(self, cmdline = "cat /etc/pam.d/passwd"):
+        super(CheckSolaris, self).CL_Passwd_Complexity(cmdline)
+    
+    def CS_Pass_Maxdays(self, cmdline = "cat /etc/default/passwd"):
         
-        p1 = subprocess.Popen(self.__morecmd[0], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)#self.__AllCommands[0]
-        retval = p1.wait()  
+        logcontent = "\nPassword time limit:\n"
+        xlcontent = ""
+        bfragile = False        
         
-        content = CheckCommonFunc.CompatibleList(p1.stdout.readlines())
-       
-        f = open(self.respath, "a+")
-        f.write("*************************Log Audit*************************\n")
+        result = os.popen(cmdline)  
+        content = ComCompatibleList(result.readlines())  
+        
         for line in content:
-            if(count == len(self._CheckCentOS__auditlogitems)):#子类并没有继承父类的私有变量，所以不能直接self.__auditlogitems。如果是self.auditlogitems则允许
-                break
-            for item in self._CheckCentOS__auditlogitems.keys():#self.__auditlogitems
-                if item in line:
-                    finish.append(item)
-                    try:
-                        itemkey = line.split()[0]
-                        itemvalue = line.split()[1]
-                    except IndexError:
-                        continue
-                    rescontent = rescontent + item + ":" + itemvalue + '\n'
-                    if(self._CheckCentOS__auditlogitems[itemkey] == itemvalue):
-                        count += 1
-                        #print("%s:pass.The value is %s"%(itemkey, itemvalue))
-                        f.write(itemkey + ":pass.The value is " + itemvalue + "\n")
-                    else:
-                        bres = True
-                        #print("%s:miss"%(itemkey))
-                        f.write(itemkey + ":miss\n")
-                    break
-                    
-        if(len(finish) == len(self._CheckCentOS__auditlogitems)):
-            f.write("All auditlog items were checked.\n")
-        else:######################################################Warn######################################################
-            #print("Uncheck:")
-            #print(list(set(__auditlogitems.keys()).difference(set(finish)))) 
-            f.write("Uncheck:" + ' '.join(list(set(self._CheckCentOS__auditlogitems.keys()).difference(set(finish)))) + "\n")
-        
-        p2 = subprocess.Popen(self.AllCommands[1], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p2.wait()  
-        
-        log = CheckCommonFunc.CompatibleStr(''.join(p2.stdout.readlines()).rstrip().lstrip())
-        #print(log)
-        rescontent = rescontent + "/var/log/wtmp:" + log
-        if log.strip() != "":
-            #print("Log:%s"%(log))
-            f.write("Log:" + log + "\n")
-        else:######################################################Warn######################################################
-            #print("Log:miss")
-            f.write("Warn:There is no log record\n")
-        f.close()
-        
-        pct1 = PCTuple(self._CheckCentOS__respos[0][0], self._CheckCentOS__respos[0][1], rescontent)
-        pct2 = PCTuple(self._CheckCentOS__expos[0][0], self._CheckCentOS__expos[0][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)        
-    
-    def CheckNetLogServConf(self):
-        rescontent = ""
-        bres = False        
-        content = []
-        bstatus = False
-        argcmd = ""
-        f = open(self.respath, "a+")
-        f.write("*************************Net Log Server*************************\n")   
-            
-        p = subprocess.Popen(self.__morecmd[0], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p.wait()             
-        
-        content = CheckCommonFunc.CompatibleList(p.stdout.readlines())
-        for line in content:
-            if "*.* @" in line and line.lstrip()[0] != '#':
-                #print(line)
-                rescontent = rescontent + line.rstrip()+ '\n'
-                f.write(line.rstrip() + '\n')
-                bstatus = True
-        if bstatus == False:
-            rescontent = "Default setting" + '\n'
-            f.write("Default setting" + '\n')            
-        f.close()
-        
-        pct1 = PCTuple(self._CheckCentOS__respos[3][0], self._CheckCentOS__respos[3][1], rescontent)
-        self.PCList.append(pct1)    
-    
-    def CheckPasswdComplexity(self):
-        #print("CheckPasswdComplexity start...")
-        rescontent = ""
-        bres = False        
-        #pam_passwdqc.so
-        content = []
-        log = ""
-        state1 = False
-        p1 = subprocess.Popen(self.__morecmd[0], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p1.wait()         
-        f = open(self.respath, "a+")
-        f.write("*************************Password Complexity Configuration*************************\n") 
-        content = CheckCommonFunc.CompatibleList(p1.stdout.readlines())
-        try:  
-            for line in content:
-                if "password" in line and  \
-                "requisite" in line and \
-                "pam_passwdqc.so" in line and\
-                line.lstrip()[0] != '#': 
-                    rescontent = rescontent + line.rstrip() + '\n'
-                    if "enforce=everyone" in line:
-                        state1 = True
-                    else:
-                        state1 = False
-            if state1 == False:
-                f.write("Warn1:There are problem in password-complexity setting.\n")
-                #rescontent = "No Setting.\n"
-                bres = True
-                #return False
-                #raise CentOSException()
-        
-            for line in content:
-                if "pam_cracklib.so" in line and \
-                   "password" in line and \
-                   "requisite" in line and \
-                   line.lstrip()[0] != '#':
-                    rescontent = rescontent + line.rstrip() + '\n'
-                    if "minlen=8" in line and "lcredit=-1" in line and \
-                       "ucredit=-1" in line and "ocredit=-1" in line and \
-                       "dcredit=-1" in line:
-                        state1 = True
-                    else:   
-                        state1 = False
-                    break
-            
-            if state1 == False:
-                bres = True
-                #rescontent = "No Setting.\n"
-                f.write("Warn2:There are problem in password-complexity setting.\n")
-                #f.close()
-                #return False        
-            else:
-                f.write("Password-complexity setting correct.\n") 
-                
-            for line in content:
-                if "password" in line and "include" in line and \
-                   "pam_stack.so" in line and line.lstrip()[0] != '#':
-                    rescontent = rescontent + line.rstrip() + '\n'
-                    if "system-auth" in line:
-                        state1 = True
-                    else:
-                        state1 = False
-            if state1 == False:
-                bres = True
-                #rescontent = "No Setting.\n"
-                f.write("Warn3:There are problem in password-complexity setting.\n")
-                #f.close()
-                #return False        
-            else:
-                f.write("Password-complexity setting correct.\n")             
-        except:
-            pass
-        finally:
-            f.close()
-            if rescontent == "":
-                rescontent == "No Setting."
-            pct1 = PCTuple(self._CheckCentOS__respos[7][0], self._CheckCentOS__respos[7][1], rescontent)
-            pct2 = PCTuple(self._CheckCentOS__expos[7][0], self._CheckCentOS__expos[7][1], "exist" if bres == True else "unexist")
-            self.PCList.append(pct1)
-            self.PCList.append(pct2)         
-            #print(rescontent) 
-    
-    def PasswordTimeLimit(self):
-        rescontent = ""
-        bres = False         
-        content = []
-        MaxDays = 0
-        p = subprocess.Popen(self.__morecmd[1], shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        retval = p.wait()
-        f = open(self.respath, "a+")
-        f.write("*************************Password Maxdays*************************\n")
-    
-        content = CheckCommonFunc.CompatibleList(p.stdout.readlines())
-        for line in content:
+            if len(line.rstrip().lstrip()) == 0:
+                continue
+            if line.lstrip()[0] == '#':
+                continue
             if "MAXWEEKS" in line:
-                log = line.lstrip().rstrip()
-                if log[0] == '#':
-                    continue
-                elif log[len(log) - 1] == '=':
-                    continue
-                else:
-                    MaxDays = int(log.split('=')[1])
+                if line.rstrip()[-1] == '=':
+                    xlcontent = "unset"
+                    bfragile = True
                     break
-        if MaxDays == 0:
-            bres = True
-            rescontent = "Default Setting."
-            f.write("PASS_MAX_DAYS:Default\n")
-        else:
-            rescontent = str(MaxDays * 7) + '\n'
-            f.write("PASS_MAX_DAYS:" + str(MaxDays * 7) + "\n")
-        f.close()
-        pct1 = PCTuple(self._CheckCentOS__respos[8][0], self._CheckCentOS__respos[8][1], rescontent)
-        pct2 = PCTuple(self._CheckCentOS__expos[8][0], self._CheckCentOS__expos[8][1], "exist" if bres == True else "unexist")
-        self.PCList.append(pct1)
-        self.PCList.append(pct2)        
+                else:
+                    MaxDays = int(line.split('=')[1]) * 7
+                    xlcontent += str(MaxDays) + '\n'
+                    logcontent += str(MaxDays) + '\n'
+                    break
+            
+        if MaxDays < 90:
+            bfragile = True
+        if len(xlcontent.rstrip().lstrip()) == 0:
+            xlcontent = "unset."
+            bfragile = True      
+            
+        self.LogList.append(logcontent)
+        retlist = ConstructPCTuple(self.__xlpos[8], xlcontent, self.__fgpos[8], bfragile)
+        self.PCList.append(retlist[0])    
+        self.PCList.append(retlist[1])     
+        
+        print(logcontent)
+        print(retlist[0][2])
+        print(retlist[1][2])
+        
+       
         
         
     def CheckUnnessesaryServ(self):

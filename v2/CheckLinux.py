@@ -183,7 +183,7 @@ class CheckLinux(object):
         bfragile = False
         
         ver = ComGetPyVersion()
-        if ver != 5:
+        if ver == 6 or ver == 7:
             cmdline = "/etc/rsyslog.conf"
         
         with open(cmdline, 'r') as fsyslog:
@@ -301,7 +301,7 @@ class CheckLinux(object):
         bfragile = False
         
         ver = ComGetLinuxVer()
-        if ver != 5:
+        if ver == 6 or ver == 7: 
             cmdline = "cat /etc/rsyslog.conf"
         
         result = os.popen(cmdline)  

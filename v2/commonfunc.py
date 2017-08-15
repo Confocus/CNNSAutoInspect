@@ -8,6 +8,7 @@ import socket
 
 class CommonCentOSException(Exception):  
     pass      
+
 class CommonNoExcelTemplate(Exception):
     pass
     
@@ -114,35 +115,26 @@ def ComGetLinuxVer():#CentOS5:Python2;CentOS6:Python2;CentOS7:Python3
     count = 0
     cmd = ""
    
-    if os.path.exists("/etc/release"):#Solaris
+    if os.path.exists("/etc/release"):  #Solaris
         fver = open("/etc/release")
         line = fver.readline().lstrip('\n').rstrip()
         fver.close()
         try:
             ver = int(line.split()[2].split('.')[0])
+            #print(ver)
         except:
             ver = 0
         
-        return ver    
+        return 11   #11 represent Solaris OS.    
     
-    if os.path.exists("/etc/redhat-release"):
+    if os.path.exists("/etc/redhat-release"):   #RHEL and CentOS version
         cmd = "cat \/etc\/redhat-release"
     
-    
-    verinfo = ""
-    p = subprocess.Popen(cmd, shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    retval = p.wait()           
-    
-    #pyVer = GetPyVersion()
-    #if pyVer == 2:
-        ##print("PyVersion is 2\n")
-        #verinfo = p.stdout.read().rstrip().lstrip() 
-    #else:
-        ##print("PyVersion is 3\n")
-        #verinfo = str(p.stdout.read().rstrip().lstrip(), encoding = "utf-8") #python3中,read到的是字符object，需要转换为str object
-    verinfo = ComCompatibleStr(p.stdout.read().rstrip().lstrip())
-    #CentOS Linux release 7.3.1611 (Core) 
-    #Red Hat Enterprise Linux Server release 5.4 (Tikanga)
+    result = os.popen(cmd)  
+    verinfo = ComCompatibleStr(result.readline())     
+    #p = subprocess.Popen(cmd, shell = 'True', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    #retval = p.wait()           
+    #verinfo = ComCompatibleStr(p.stdout.read().rstrip().lstrip())
     
     for i in verinfo.split():
         count += 1
@@ -154,14 +146,14 @@ def ComGetLinuxVer():#CentOS5:Python2;CentOS6:Python2;CentOS7:Python3
     except IndexError:
         ver = 0
         return ver
-    ver = ver.split(".")[0]
     
-    try:   
+    try:
+        ver = ver.split(".")[0]
         ver = int(ver)
-    except ValueError:
-        ver = 0       
-        
-    return ver#CentOS5=RedHat5；#CentOS6 = CentOS7 = RedHat6 #外部只需判断是否等于5
+    except:
+        ver = 0  
+    
+    return ver  #CentOS5=RedHat5；#CentOS6 = CentOS7 = RedHat6 #外部只需判断是否等于5
 
 
 def ComCompatibleStr(s):#Sheild the difference between py2str and py3str
@@ -185,3 +177,6 @@ def ComCompatibleList(l):#Sheild the difference of between py2list and py3list
             content.append(line.rstrip().lstrip())    
     return content
 
+if __name__ == "__main__":
+    print("commonfunc start...")
+    print(ComGetLinuxVer())
