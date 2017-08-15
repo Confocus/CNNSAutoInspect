@@ -166,6 +166,6 @@ def CheckRHELRun():
     c.CL_GenTxtLog()
     
 
-if __name__ == "__main__":
-    print("RHELCheck start...")
-    CheckRHELRun()
+#if __name__ == "__main__":
+    #print("RHELCheck start...")
+    #CheckRHELRun()

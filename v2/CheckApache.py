@@ -690,7 +690,7 @@ def CheckApacheRun():
             
     c.CA_GenTxtLog()
     
-if __name__ == "__main__":
-    print("ApacheCheck start...")
-    CheckApacheRun()
+#if __name__ == "__main__":
+    #print("ApacheCheck start...")
+    #CheckApacheRun()
     

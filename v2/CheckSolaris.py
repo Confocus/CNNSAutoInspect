@@ -37,6 +37,7 @@ class CheckSolaris(CheckLinux):
         logcontent = "\nPassword time limit:\n"
         xlcontent = ""
         bfragile = False        
+        MaxDays = 0
         
         result = os.popen(cmdline)  
         content = ComCompatibleList(result.readlines())  
@@ -64,13 +65,13 @@ class CheckSolaris(CheckLinux):
             bfragile = True      
             
         self.LogList.append(logcontent)
-        retlist = ConstructPCTuple(self.__xlpos[8], xlcontent, self.__fgpos[8], bfragile)
+        retlist = ConstructPCTuple(self._CheckLinux__xlpos[8], xlcontent, self._CheckLinux__fgpos[8], bfragile)
         self.PCList.append(retlist[0])    
         self.PCList.append(retlist[1])     
         
-        print(logcontent)
-        print(retlist[0][2])
-        print(retlist[1][2])
+        #print(logcontent)
+        #print(retlist[0][2])
+        #print(retlist[1][2])
         
     def CS_Unnecessesary_Serv(self, cmdline = "svcs -a"):
         logcontent = "\nUnnecessary Service:\n"
@@ -98,182 +99,24 @@ class CheckSolaris(CheckLinux):
                     
                     
         self.LogList.append(logcontent)
-        retlist = ConstructPCTuple(self.__xlpos[17], xlcontent, self.__fgpos[17], bfragile)
+        retlist = ConstructPCTuple(self._CheckLinux__xlpos[17], xlcontent, self._CheckLinux__fgpos[17], bfragile)
         self.PCList.append(retlist[0])    
         self.PCList.append(retlist[1])     
     
-        print(logcontent)
-        print(retlist[0][2])
-        print(retlist[1][2])    
+           
         
-    def CS_(self, cmdline = "cat /etc/inet/ntp.client"):
+    def CS_NPT_Serv(self, cmdline = "cat /etc/inet/ntp.client"):
         super(CheckSolaris, self).CL_NPT_Serv(cmdline)        
         
     def testfunc(self):
         print(self._CheckCentOS__test)#访问父类私有属性的一种方式————name mangling
         
 
-#def CheckSolarisRun():
-    #c = CheckSolaris()
-    ##c.CheckUnnessesaryServ()
-    #assert CheckCommonFunc.GetLinuxVer() != 0
-    
-    ##if os.path.exists(CheckCentOS.respath) == True:
-        ##os.remove(CheckCentOS.respath)
-    #if os.path.exists(c.respath) == True:
-        #os.remove(c.respath)    
-    #logtime = str(time.time()).replace('.', '')
-    #logpath = "/usr/ProjectTest/log_" + logtime + ".txt"
-    
-    #if os.path.exists("/usr/ProjectTest") == False:
-        #os.mkdir("/usr/ProjectTest")    
-    #if os.path.exists(logpath) == True:
-        #os.remove(logpath)
-        
-    #flog = open(logpath, "w")
-   
-    
-    #try:    
-        #c.CheckAuditLog()
-    #except:
-        #flog.write("CheckAuditLog exception.\n")
-    #else:
-        #flog.write("CheckAuditLog finished.\n")
-        
-    #try:    
-        #c.CheckLogAuth()
-    #except:
-        #flog.write("CheckLogAuth exception.\n")
-    #else:
-        #flog.write("CheckLogAuth finished.\n")
-    
-    #try:
-        #c.CheckNetLogServConf()
-    #except:
-        #flog.write("CheckNetLogServConf exception.\n")
-    #else:
-        #flog.write("CheckNetLogServConf finished.\n")
-        
-    #try:
-        #c.CheckAccountAuth()
-    #except:
-        #flog.write("CheckAccountAuth exception.\n")
-    #else:
-        #flog.write("CheckAccountAuth finished.\n")    
-        
-    #try:    
-        #c.CheckUselessAccount()
-    #except:
-        #flog.write("CheckUselessAccount exception.\n")
-    #else:
-        #flog.write("CheckUselessAccount finished.\n")   
-        
-    #try:    
-        #c.CheckPermitRootLogin()
-    #except:
-        #flog.write("CheckPermitRootLogin exception.\n")
-    #else:
-        #flog.write("CheckPermitRootLogin finished.\n")
-        
-    #try:
-        #c.CheckPasswdComplexity()
-    #except:
-        #flog.write("CheckPasswdComplexity exception.\n")
-    #else:
-        #flog.write("CheckPasswdComplexity finished.\n")
-        
-    #try:
-        #c.PasswordTimeLimit()
-    #except:
-        #flog.write("PasswordTimeLimit exception.\n")
-    #else:
-        #flog.write("PasswordTimeLimit finished.\n")
-        
-    #try:
-        #c.AuthenFailedTimes()
-    #except:
-        #flog.write("AuthenFailedTimes exception.\n")
-    #else:
-        #flog.write("AuthenFailedTimes finished.\n")
-        
-    #try:
-        #c.PasswdHistoryTimes()
-    #except:
-        #flog.write("PasswdHistoryTimes exception.\n")
-    #else:
-        #flog.write("PasswdHistoryTimes finished.\n")
-        
-    #try:
-        #c.CheckVitalDirAuth()
-    #except:
-        #flog.write("CheckVitalDirAuth exception.\n")
-    #else:
-        #flog.write("CheckVitalDirAuth finished.\n")
-        
-    #try:
-        #c.CheckUmask()
-    #except:
-        #flog.write("CheckUmask exception.\n")
-    #else:
-        #flog.write("CheckUmask finished.\n")
-        
-    #try:
-        #c.CheckRemoteLogin()
-    #except:
-        #flog.write("CheckRemoteLogin exception.\n")
-    #else:
-        #flog.write("CheckRemoteLogin finished.\n")
-        
-    #try:
-        #c.CheckIPRangement()
-    #except:
-        #flog.write("CheckIPRangement exception.\n")
-    #else:
-        #flog.write("CheckIPRangement finished.\n")
-            
-    #try:
-        #c.CheckTimeout()
-    #except:
-        #flog.write("CheckTimeout exception.\n")
-    #else:
-        #flog.write("CheckTimeout finished.\n")
-        
-    #try:
-        #c.CheckUnnessesaryServ()
-    #except:
-        #flog.write("CheckUnnessesaryServ exception.\n")
-    #else:
-        #flog.write("CheckUnnessesaryServ finished.\n")
-        
-    #try:
-        #c.CheckNPTServ()
-    #except:
-        #flog.write("CheckNPTServ exception.\n")
-    #else:
-        #flog.write("CheckNPTServ finished.\n")
-        
-    #try:
-        #c.CheckDNSIP()
-    #except:
-        #flog.write("CheckDNSIP exception.\n")
-    #else:
-        #flog.write("CheckDNSIP finished.\n")    
-    
-    #try:
-        #oe = OperExcel()
-        #oe.FillContent("/usr/ProjectTest/centos2.xlsx", c.PCList)    
-    #except:
-        #flog.write("Operate Excel exception.\n")
-    #else:
-        #flog.write("Operate Excel finished.\n")
-        
-    #flog.close()
-
 
 def CheckSolarisRun():
     
     try:
-        c = CheckLinux()
+        c = CheckSolaris()
     except CommonNoExcelTemplate as e:
         print("NoExcelTemplate exception:" + repr(e) + "\n")
         sys.exit(0)    
@@ -331,14 +174,14 @@ def CheckSolarisRun():
             flog.write("CheckPermitRoot finished.\n")         
             
         try:    
-            c.CL_Passwd_Complexity()
+            c.CS_Passwd_Complexity()
         except Exception as e:
             flog.write("CheckPasswdComplexity exception:" + repr(e) + "\n")
         else:
             flog.write("CheckPasswdComplexity finished.\n")  
             
         try:    
-            c.CL_Pass_Maxdays()
+            c.CS_Pass_Maxdays()
         except Exception as e:
             flog.write("CheckPasswdMaxdays exception:" + repr(e) + "\n")
         else:
@@ -394,14 +237,14 @@ def CheckSolarisRun():
             flog.write("CheckTimeout finished.\n")
             
         try:    
-            c.CL_Unnecessesary_Serv()
+            c.CS_Unnecessesary_Serv()
         except Exception as e:
             flog.write("CheckUnnecessaryService exception:" + repr(e) + "\n")
         else:
             flog.write("CheckUnnecessaryService finished.\n")  
             
         try:    
-            c.CL_NPT_Serv()
+            c.CS_NPT_Serv()
         except Exception as e:
             flog.write("CheckNPTService exception:" + repr(e) + "\n")
         else:
@@ -415,6 +258,7 @@ def CheckSolarisRun():
             flog.write("CheckDNSService finished.\n")   
             
         try:
+            print(c.xlpath)
             FillContent(c.xlpath, c.PCList)
         except Exception as e:
             flog.write("Operate Excel exception:" + repr(e) + "\n")
@@ -424,6 +268,6 @@ def CheckSolarisRun():
     c.CL_GenTxtLog()
 
 
-if __name__ == "__main__":
-    print("start...")
-    CheckSolarisRun()
+#if __name__ == "__main__":
+    #print("start...")
+    #CheckSolarisRun()

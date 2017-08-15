@@ -168,6 +168,6 @@ def CheckCentOSRun():
     c.CL_GenTxtLog()
     
 
-if __name__ == "__main__":
-    print("CentOSCheck start...")
-    CheckCentOSRun()
+#if __name__ == "__main__":
+    #print("CentOSCheck start...")
+    #CheckCentOSRun()

@@ -1035,7 +1035,7 @@ def CheckLinuxRun():
 def Run():
     print("CentOS running.")
     
-if __name__ == "__main__":
-    print("LinuxCheck start...")
-    CheckLinuxRun()
+#if __name__ == "__main__":
+    #print("LinuxCheck start...")
+    #CheckLinuxRun()
     
